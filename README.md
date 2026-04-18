@@ -1,17 +1,43 @@
-# maeum
+# 🌿 마음이 (Maeum)
+> 개인 프로젝트 | 2026.04 ~ 개발중 🚧
 
-A new Flutter project.
+Flutter 기반 AI 감정 케어 애플리케이션입니다.
+정신과 가기 부담스러운 현대인들이 일상에서 자신의 감정을 인식하고
+이해할 수 있도록 돕는 서비스입니다.
 
-## Getting Started
+> MindLog(캡스톤디자인 프로젝트)를 기반으로
+> Spring Boot 백엔드 구현 및 출시를 목표로 디벨롭한 1인 개발 프로젝트입니다.
 
-This project is a starting point for a Flutter application.
+## 💡 기획 배경
+현대 사회에서 정신과 상담에 대한 부정적 인식으로
+도움이 필요한 상황에서도 접근하지 못하는 경우가 많습니다.
+마음이는 상담 전 자신의 감정 상태를 스스로 인식하고,
+일상 속에서 조금씩 마음을 돌볼 수 있도록 돕기 위해 기획했습니다.
 
-A few resources to get you started if this is your first Flutter project:
+## ✨ 주요 기능
+- 🎚 슬라이더 기반 5가지 감정 수치 입력 (기쁨, 화남, 불안, 평안, 슬픔)
+- 🤖 OpenAI GPT API 기반 감정 분석, 요약 및 개인화 케어 추천
+- 📅 캘린더 기반 감정 기록 (내 이모지 + AI 대표 이모지 구분 표시)
+- 📊 주간/월간 감정 통계 시각화 및 이전 기간 비교
+- 🔔 감정 기록 알림 설정 및 월 마감 알림
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## 🛠 기술 스택
+| 구분 | 기술 |
+|------|------|
+| Frontend | Flutter, Dart |
+| Backend | Spring Boot, Spring Security, JWT |
+| Database | MySQL |
+| AI | OpenAI GPT API |
+| Auth | 카카오 로그인 |
+| 통신 | Retrofit2 |
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📱 타겟
+학생, 직장인 등 현대를 살아가는 모든 사람들
+
+## 🔮 업데이트 예정
+- 🎭 감정 선택 모드 추가 — 수치 입력 없이 오늘 느낀 감정 태그를 선택하면 AI가 분석
+- 🌈 감정 종류 확대 — 피곤함, 우울함, 설렘, 외로움 등 다양한 감정 추가 예정
+- 🍎 App Store 출시 예정
+
+## 📅 개발 기간
+2026.04 ~ 개발중 🚧
