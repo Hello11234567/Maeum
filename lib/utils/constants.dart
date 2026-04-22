@@ -11,4 +11,7 @@ class AppConstants {
 
   //앱 이름
   static const String appName = '마음이';
+
+  //카카오 로그인
+  static const String kakaoNativeAppKey = String.fromEnvironment('KAKAO_NATIVE_APP_KEY');
 }

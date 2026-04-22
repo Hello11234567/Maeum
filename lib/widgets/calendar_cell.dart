@@ -1,0 +1,56 @@
+// 메인 캘린더에서 날짜 하나를 표시하는 셀 컴포넌트
+// day: 날짜 숫자
+// isToday: 오늘 날짜 여부 (true면 강조 표시)
+// myEmoji: 사용자가 직접 선택한 이모지
+// aiEmoji: AI가 분석한 대표 이모지
+// onTap: 날짜 셀 클릭 시 실행할 함수
+
+import 'package:flutter/material.dart';
+import '../utils/colors.dart';
+import '../utils/text_style.dart';
+
+class CalendarCell extends StatelessWidget {
+  final int day;
+  final bool isToday;
+  final String? myEmoji;
+  final String? aiEmoji;
+  final VoidCallback onTap;
+
+  const CalendarCell({
+    super.key,
+    required this.day,
+    required this.isToday,
+    this.myEmoji,
+    this.aiEmoji,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isToday ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (myEmoji != null)
+              Text(myEmoji!, style: const TextStyle(fontSize: 10)),
+            if (aiEmoji != null)
+              Text(aiEmoji!, style: const TextStyle(fontSize: 8)),
+            Text(
+              day.toString(),
+              style: AppTextStyle.caption.copyWith(
+                color: isToday ? Colors.white : AppColors.textPrimary,
+                fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
