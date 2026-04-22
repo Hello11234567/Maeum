@@ -1,12 +1,13 @@
 // 앱의 시작점
-// KakaoSdk 초기화 및 앱 테마 적용
-// AppConstants.kakaoNativeAppKey: 카카오 개발자 콘솔에서 발급받은 네이티브 앱 키
-// AppTheme.lightTheme: utils/app_theme.dart에서 정의한 전체 테마 적용
+// 라우트 설정으로 각 화면 연결
+// initialRoute: 앱 시작 시 스플래시 화면으로 시작
 
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'utils/app_theme.dart';
 import 'utils/constants.dart';
+import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,11 +24,12 @@ class MyApp extends StatelessWidget {
       title: '마음이',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const Scaffold(
-        body: Center(
-          child: Text('마음이'),
-        ),
-      ),
+      initialRoute: '/splash',
+      routes: {
+        '/splash': (context) => const SplashScreen(),
+        '/login': (context) => const LoginScreen(),
+        //나중에 화면 추가될 때마다 추가
+      },
     );
   }
 }
