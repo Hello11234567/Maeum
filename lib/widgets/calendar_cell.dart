@@ -32,27 +32,32 @@ class CalendarCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isToday ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (myEmoji != null)
-              Text(myEmoji!, style: const TextStyle(fontSize: 10)),
-            if (aiEmoji != null)
-              Text(aiEmoji!, style: const TextStyle(fontSize: 8)),
-            Text(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 20,
+            child: Text(
               day.toString(),
               style: AppTextStyle.caption.copyWith(
-                color: isToday ? Colors.white : isCurrentMonth ? AppColors.textPrimary : AppColors.textSecondary.withValues(alpha: 0.4),
-                fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
+                color: isToday
+                    ? AppColors.primary
+                    : isCurrentMonth
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary.withValues(alpha: 0.4),
+                fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
+                fontSize: isToday ? 14 : null,
               ),
             ),
-          ],
-        ),
+          ),
+          //내 이모지
+          if (myEmoji != null)
+            Text(myEmoji!, style: const TextStyle(fontSize: 11)),
+          //AI 이모지 (✨로 구분)
+          if (aiEmoji != null)
+            Text('✨${aiEmoji!}', style: const TextStyle(fontSize: 9)),
+        ],
       ),
     );
   }

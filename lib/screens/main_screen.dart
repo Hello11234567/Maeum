@@ -71,6 +71,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final days = _getDaysInMonth();
 
+    //화면 높이 가져오기
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -163,10 +167,11 @@ class _MainScreenState extends State<MainScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GridView.builder(
+                  shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 7,
-                    childAspectRatio: 1,
+                    childAspectRatio: (screenWidth / 7) / (screenHeight * 0.13),
                   ),
                   itemCount: days.length,
                   itemBuilder: (context, index) {
