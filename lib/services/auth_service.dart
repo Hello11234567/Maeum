@@ -36,6 +36,7 @@ class AuthService {
       }
       return false;
     } catch (e) {
+      print('카카오 로그인 에러: $e');
       return false;
     }
   }

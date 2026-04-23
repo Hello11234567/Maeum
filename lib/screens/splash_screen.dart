@@ -101,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     const SizedBox(height: 24),
                     Text('마음이', style: AppTextStyle.heading1),
                     const SizedBox(height: 8),
-                    Text('오늘의 마음은 어떠신가요?', style: AppTextStyle.body2),
+                    Text('오늘은 마음이 어떠신가요?', style: AppTextStyle.body2),
                   ],
                 ),
             ),

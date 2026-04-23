@@ -20,13 +20,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   Future<void> _kakaoLogin() async {
-    setState(() => _isLoading = true);
-    final success = await _authService.kakaoLogin();
-    setState(() => _isLoading = true);
+    //백엔드 연결 후 활성화
+    //setState(() => _isLoading = true);
+    //final success = await _authService.kakaoLogin();
+    //setState(() => _isLoading = true);
+    //if (success && mounted) {
+    //  Navigator.pushReplacementNamed(context, '/main');
+    //}
 
-    if (success && mounted) {
-      // 로그인 성공 시 메인 화면으로 이동 (나중에 연결)
-    }
+    //임시 처리
+    Navigator.pushReplacementNamed(context, '/main');
   }
 
   @override
@@ -84,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('💬 '),
+                      const Text('💬'),
                       Text(
                         '카카오로 시작하기',
                         style: AppTextStyle.button.copyWith(
