@@ -28,15 +28,11 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        await _storage.write(
-          key: 'jwt_token',
-          value: response.data['token'],
-        );
+        await _storage.write(key: 'jwt_token', value: response.data['token']);
         return true;
       }
       return false;
     } catch (e) {
-      print('카카오 로그인 에러: $e');
       return false;
     }
   }

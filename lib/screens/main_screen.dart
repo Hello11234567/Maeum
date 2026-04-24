@@ -5,6 +5,7 @@
 // 날짜 길게 클릭 시 AI 분석 결과 화면으로 이동
 
 import 'package:flutter/material.dart';
+import 'package:maeum/screens/emoji_select_screen.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/calendar_cell.dart';
@@ -18,6 +19,9 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   DateTime _currentMonth = DateTime.now();
+
+  //날짜별 내 이모지 저장(백엔드 연결 시 서버에서 불러오도록 수정)
+  final Map<String, String> _myEmojis = {};
 
   //해당 월의 날짜 목록 생성
   List<DateTime?> _getDaysInMonth() {
@@ -181,8 +185,21 @@ class _MainScreenState extends State<MainScreen> {
                       day: date.day,
                       isToday: _isToday(date),
                       isCurrentMonth: date.month == _currentMonth.month,
-                      onTap: () {
-                        //나중에 감정 입력 화면으로 이동
+                      myEmoji: _myEmojis[date.toIso8601String().substring(0, 10)],
+                      onTap: () async {
+                        final result = await showModalBottomSheet<String>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: AppColors.background,
+                          builder: (context) =>
+                              EmojiSelectScreen(selectedDate: date),
+                        );
+                        //백엔드 연결 시 서버에 저장하도록 수정
+                        if (result != null) {
+                          setState(() {
+                            _myEmojis[date.toIso8601String().substring(0, 10)] = result;
+                          });
+                        }
                       },
                     );
                   },

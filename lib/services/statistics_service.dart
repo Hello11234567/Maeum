@@ -43,7 +43,7 @@ class StatisticsService {
   }
 
   Future<List<Statistics>?> getWeeklyComparison() async {
-    try{
+    try {
       final response = await _dio.get(
         '${AppConstants.baseUrl}/statistics/weekly/compare',
         options: Options(headers: await _getHeaders()),
@@ -57,7 +57,7 @@ class StatisticsService {
   }
 
   Future<List<Statistics>?> getMonthlyComparison() async {
-    try{
+    try {
       final response = await _dio.get(
         '${AppConstants.baseUrl}/statistics/monthly/compare',
         options: Options(headers: await _getHeaders()),

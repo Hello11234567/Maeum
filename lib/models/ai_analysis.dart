@@ -15,7 +15,7 @@ class AiAnalysis {
   final String createdAt;
 
   AiAnalysis({
-    this. id,
+    this.id,
     required this.analysisDate,
     required this.summary,
     required this.careList,

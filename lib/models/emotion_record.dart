@@ -42,6 +42,7 @@ class EmotionRecord {
       createdAt: json['createdAt'],
     );
   }
+
   Map<String, dynamic> toJson() {
     return {
       'recordDate': recordDate,

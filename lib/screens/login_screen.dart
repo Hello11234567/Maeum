@@ -44,29 +44,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
               //로고 영역
               Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.secondary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                      ),
-                    borderRadius: BorderRadius.circular(24),
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: const Icon(
-                    Icons.favorite_rounded,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Icon(
+                  Icons.favorite_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
               ),
               const SizedBox(height: 20),
               Text('마음이', style: AppTextStyle.heading1),
               const SizedBox(height: 8),
-              Text(
-                '오늘은 마음이 어떠신가요?',
-                style: AppTextStyle.body2,
-              ),
+              Text('오늘은 마음이 어떠신가요?', style: AppTextStyle.body2),
               const Spacer(flex: 2),
 
               //카카오 로그인 버튼
@@ -85,17 +82,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.black)
                       : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('💬'),
-                      Text(
-                        '카카오로 시작하기',
-                        style: AppTextStyle.button.copyWith(
-                          color: Colors.black,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('💬'),
+                            Text(
+                              '카카오로 시작하기',
+                              style: AppTextStyle.button.copyWith(
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 40),

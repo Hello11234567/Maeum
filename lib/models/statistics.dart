@@ -18,7 +18,7 @@ class Statistics {
   final String? createdAt;
 
   Statistics({
-  this.id,
+    this.id,
     required this.type,
     required this.startDate,
     required this.endDate,

@@ -18,7 +18,7 @@ class EmotionService {
     return {'Authorization': 'Bearer $token'};
   }
 
-  Future <EmotionRecord?> saveEmotion(EmotionRecord record) async {
+  Future<EmotionRecord?> saveEmotion(EmotionRecord record) async {
     try {
       final response = await _dio.post(
         '${AppConstants.baseUrl}/emotions',

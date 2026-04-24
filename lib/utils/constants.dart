@@ -5,13 +5,13 @@ class AppConstants {
   static const String baseUrl = 'http://10.0.2.2:8080/api';
 
   //감정 이름
-  static const List<String> emotionNames = [
-    '기쁨', '화남', '불안', '평안', '슬픔'
-  ];
+  static const List<String> emotionNames = ['기쁨', '화남', '불안', '평안', '슬픔'];
 
   //앱 이름
   static const String appName = '마음이';
 
   //카카오 로그인
-  static const String kakaoNativeAppKey = String.fromEnvironment('KAKAO_NATIVE_APP_KEY');
+  static const String kakaoNativeAppKey = String.fromEnvironment(
+    'KAKAO_NATIVE_APP_KEY',
+  );
 }

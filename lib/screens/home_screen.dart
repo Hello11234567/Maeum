@@ -38,7 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: AppColors.textSecondary,
         selectedFontSize: 11,
         unselectedFontSize: 11,
-        iconSize: 30, //아이콘 크기 키우기
+        iconSize: 30,
+        //아이콘 크기 키우기
         elevation: 8,
         items: const [
           BottomNavigationBarItem(

@@ -66,7 +66,7 @@ class EmotionLineChart extends StatelessWidget {
   }
 }
 
-class LineChartPainter extends CustomPainter{
+class LineChartPainter extends CustomPainter {
   final List<List<double>> data;
   final List<Color> colors;
   final List<String> labels;
@@ -91,11 +91,7 @@ class LineChartPainter extends CustomPainter{
 
     for (int i = 0; i <= 2; i++) {
       final y = chartHeight * (1 - i / 2);
-      canvas.drawLine(
-        Offset(leftPadding, y),
-        Offset(size.width, y),
-        gridPaint,
-      );
+      canvas.drawLine(Offset(leftPadding, y), Offset(size.width, y), gridPaint);
     }
 
     //데이터 라인 그리기
@@ -110,10 +106,10 @@ class LineChartPainter extends CustomPainter{
         ..strokeCap = StrokeCap.round;
 
       final path = Path();
-      for ( int j = 0; j < points.length; j++) {
+      for (int j = 0; j < points.length; j++) {
         final x = leftPadding + (j / (points.length - 1)) * chartWidth;
         final y = chartHeight * (1 - points[j] / 10);
-        if ( j == 0) {
+        if (j == 0) {
           path.moveTo(x, y);
         } else {
           path.lineTo(x, y);
