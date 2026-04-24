@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import '../utils/colors.dart';
 import 'main_screen.dart';
+import '../screens/mypage_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const Center(child: Text('AI 분석')),
     const MainScreen(),
     const Center(child: Text('통계')),
-    const Center(child: Text('마이페이지')),
+    const MyPageScreen(),
   ];
 
   @override
