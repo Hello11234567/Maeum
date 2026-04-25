@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
+import '../screens/profile_edit_screen.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -186,7 +187,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
             child: Column(
               children: [
                 _menuItem(context, '✏️', '프로필 수정', () {
-                  //백엔드 연결 시 프로필 수정 화면으로 이동
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileEditScreen()));
                 }),
                 _divider(),
 

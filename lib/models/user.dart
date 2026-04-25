@@ -5,37 +5,44 @@
 
 class User {
   final int id;
-  final String email;
   final String nickname;
+  final String? ageRange;
   final String? profileImage;
+  final String? intro; //나를 한 마디로 (AI 분석 반영)
   final bool notificationsEnabled;
   final String? notificationTime;
+  final String createdAt; //마음이와 함께한 N일 계산용
 
   User({
     required this.id,
-    required this.email,
     required this.nickname,
+    this.ageRange,
     this.profileImage,
+    this.intro,
     required this.notificationsEnabled,
     this.notificationTime,
+    required this.createdAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
-      email: json['emial'],
       nickname: json['nickname'],
       profileImage: json['profileImage'],
+      ageRange: json['ageRange'],
+      intro: json['intro'],
       notificationsEnabled: json['notificationEnabled'],
       notificationTime: json['notificationTime'],
+      createdAt: json['createdAt'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'email': email,
+      'nickname': nickname,
+      'ageRange': ageRange,
       'profileImage': profileImage,
+      'intro': intro,
       'notificationsEnabled': notificationsEnabled,
       'notificationTime': notificationTime,
     };
