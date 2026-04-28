@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../screens/profile_edit_screen.dart';
+import '../screens/notification_screen.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -192,7 +193,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 _divider(),
 
                 _menuItem(context, '🔔', '알림 설정', () {
-                  //나중에 알림 설정 화면으로 이동
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationScreen()));
                 }),
                 _divider(),
 
