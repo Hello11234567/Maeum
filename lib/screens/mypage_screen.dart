@@ -188,12 +188,22 @@ class _MyPageScreenState extends State<MyPageScreen> {
             child: Column(
               children: [
                 _menuItem(context, '✏️', '프로필 수정', () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileEditScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileEditScreen(),
+                    ),
+                  );
                 }),
                 _divider(),
 
                 _menuItem(context, '🔔', '알림 설정', () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationScreen(),
+                    ),
+                  );
                 }),
                 _divider(),
 

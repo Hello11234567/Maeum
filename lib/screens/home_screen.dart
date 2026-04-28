@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../utils/colors.dart';
 import 'main_screen.dart';
 import '../screens/mypage_screen.dart';
+import '../screens/diary_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 2;
 
   final List<Widget> _screens = [
-    const Center(child: Text('일기')),
+    const DiaryScreen(),
     const Center(child: Text('AI 분석')),
     const MainScreen(),
     const Center(child: Text('통계')),
