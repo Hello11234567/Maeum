@@ -7,6 +7,7 @@ import '../utils/colors.dart';
 import 'main_screen.dart';
 import '../screens/mypage_screen.dart';
 import '../screens/diary_screen.dart';
+import '../screens/ai_analysis_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const DiaryScreen(),
-    const Center(child: Text('AI 분석')),
+    const AiAnalysisScreen(),
     const MainScreen(),
     const Center(child: Text('통계')),
     const MyPageScreen(),
@@ -38,31 +39,31 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
+        selectedFontSize: 0,
+        unselectedFontSize: 0,
         iconSize: 30,
         //아이콘 크기 키우기
         elevation: 8,
         items: const [
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/icons/diary.png')),
-            label: '일기',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/icons/ai.png')),
-            label: 'AI 분석',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/icons/home.png')),
-            label: '홈',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/icons/chart.png')),
-            label: '통계',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/icons/user.png')),
-            label: '마이페이지',
+            label: '',
           ),
         ],
       ),

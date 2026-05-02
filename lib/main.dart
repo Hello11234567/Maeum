@@ -9,6 +9,7 @@ import 'utils/constants.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/diary_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/main': (context) => const HomeScreen(),
+        '/diary': (context) => const DiaryScreen(),
         //나중에 화면 추가될 때마다 추가
       },
     );
