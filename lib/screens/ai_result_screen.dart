@@ -17,6 +17,8 @@ class AiResultScreen extends StatelessWidget {
   final double anxiety;
   final double peace;
   final double sadness;
+  final String mode; //'new' or 'view'
+  final DateTime? date; //지난 날짜 결과 보기 시 사용
 
   const AiResultScreen({
     super.key,
@@ -25,6 +27,8 @@ class AiResultScreen extends StatelessWidget {
     required this.anxiety,
     required this.peace,
     required this.sadness,
+    required this.mode,
+    this.date,
   });
 
   //감정에 맞는 캐릭터 감정 표정 반환
@@ -54,7 +58,7 @@ class AiResultScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('AI 분석 결과', style: AppTextStyle.heading3),
         centerTitle: true,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         actions: [
           //마지막 수정 시간(백엔드 연결 시 실제 시간으로 교체)
           Padding(

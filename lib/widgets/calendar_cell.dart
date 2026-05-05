@@ -17,6 +17,7 @@ class CalendarCell extends StatelessWidget {
   final String? myEmoji;
   final String? aiEmoji;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   const CalendarCell({
     super.key,
@@ -26,12 +27,14 @@ class CalendarCell extends StatelessWidget {
     this.myEmoji,
     this.aiEmoji,
     required this.onTap,
+    this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
         color: Colors.transparent,
         child: Column(

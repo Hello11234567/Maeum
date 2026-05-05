@@ -61,6 +61,8 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
           context,
           MaterialPageRoute(
             builder: (context) => AiResultScreen(
+              mode: 'new',
+              date: null,
               joy: widget.joy,
               anger: widget.anger,
               anxiety: widget.anxiety,

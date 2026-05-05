@@ -5,6 +5,7 @@
 // 날짜 길게 클릭 시 AI 분석 결과 화면으로 이동
 
 import 'package:flutter/material.dart';
+import 'package:maeum/screens/ai_result_screen.dart';
 import 'package:maeum/screens/emoji_select_screen.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
@@ -185,7 +186,8 @@ class _MainScreenState extends State<MainScreen> {
                       day: date.day,
                       isToday: _isToday(date),
                       isCurrentMonth: date.month == _currentMonth.month,
-                      myEmoji: _myEmojis[date.toIso8601String().substring(0, 10)],
+                      myEmoji:
+                          _myEmojis[date.toIso8601String().substring(0, 10)],
                       onTap: () async {
                         final result = await showModalBottomSheet<String>(
                           context: context,
@@ -197,9 +199,27 @@ class _MainScreenState extends State<MainScreen> {
                         //백엔드 연결 시 서버에 저장하도록 수정
                         if (result != null) {
                           setState(() {
-                            _myEmojis[date.toIso8601String().substring(0, 10)] = result;
+                            _myEmojis[date.toIso8601String().substring(0, 10)] =
+                                result;
                           });
                         }
+                      },
+                      onLongPress: () {
+                        //백엔드 연결 시 실제 데이터로 교체
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AiResultScreen(
+                              mode: 'view',
+                              date: date,
+                              joy: 0,
+                              anger: 0,
+                              anxiety: 0,
+                              peace: 0,
+                              sadness: 0,
+                            ),
+                          ),
+                        );
                       },
                     );
                   },
