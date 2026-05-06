@@ -11,6 +11,7 @@ import '../utils/text_style.dart';
 import '../widgets/emotion_slider.dart';
 import '../widgets/custom_button.dart';
 import 'ai_loading_screen.dart';
+import '../screens/diary_write_screen.dart';
 
 class AiAnalysisScreen extends StatefulWidget {
   const AiAnalysisScreen({super.key});
@@ -200,9 +201,13 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
-                    //일기 탭으로 이동
-                    Navigator.pushReplacementNamed(context, '/diary');
+                    Navigator.pop(context); //팝업 닫기
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DiaryWriteScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
