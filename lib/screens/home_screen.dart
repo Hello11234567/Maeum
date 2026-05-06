@@ -8,6 +8,7 @@ import 'main_screen.dart';
 import '../screens/mypage_screen.dart';
 import '../screens/diary_screen.dart';
 import '../screens/ai_analysis_screen.dart';
+import '../screens/statistics_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const DiaryScreen(),
     const AiAnalysisScreen(),
     const MainScreen(),
-    const Center(child: Text('통계')),
+    const StatisticsScreen(),
     const MyPageScreen(),
   ];
 

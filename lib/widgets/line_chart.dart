@@ -117,6 +117,24 @@ class LineChartPainter extends CustomPainter {
       }
       canvas.drawPath(path, paint);
     }
+
+    //x축 라벨 그리기
+    final textStyle = TextStyle(
+      color: const Color(0xFFa0aab4),
+      fontSize: 9,
+    );
+
+    for (int j = 0; j < labels.length; j++) {
+      final x = leftPadding + (j / (labels.length - 1)) * chartWidth;
+      final textSpan = TextSpan(text: labels[j], style: textStyle);
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(x - textPainter.width / 2, chartHeight + 4),
+      );
+    }
   }
 
   @override
