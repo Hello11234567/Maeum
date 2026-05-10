@@ -205,19 +205,42 @@ class _MainScreenState extends State<MainScreen> {
                         }
                       },
                       onLongPress: () {
-                        //백엔드 연결 시 실제 데이터로 교체
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AiResultScreen(
-                              mode: 'view',
-                              date: date,
-                              joy: 0,
-                              anger: 0,
-                              anxiety: 0,
-                              peace: 0,
-                              sadness: 0,
+                        //백엔드 연결 시 실제 데이터 확인 후 분기
+                        //기록 있으면 AI 분석 결과로, 없으면 다이얼로그
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  '📭',
+                                  style: TextStyle(fontSize: 36),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  '${date.month}월 ${date.day}일',
+                                  style: AppTextStyle.heading3,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '이날은 기록하지 않았어요',
+                                  style: AppTextStyle.body2,
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  '확인',
+                                  style: TextStyle(color: AppColors.primary),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },
