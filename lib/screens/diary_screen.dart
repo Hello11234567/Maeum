@@ -5,6 +5,7 @@
 // 백엔드 연결 시 실제 데이터로 교체
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 
@@ -16,109 +17,189 @@ class DiaryScreen extends StatefulWidget {
 }
 
 class _DiaryScreenState extends State<DiaryScreen> {
-  //백엔드 연결 시 실제 데이터로 교체
-  final List<Map<String, dynamic>> _diaries = [
-    {'date': DateTime(2026, 4, 24), 'content': '오늘 면접 결과가 좋았다. 오랜만에 기분 좋은 하루!'},
-    {'date': DateTime(2026, 4, 23), 'content': '오늘은 좀 지친 하루이다 그래도 내일은 힘내야지!'},
-    {'date': DateTime(2026, 4, 22), 'content': '내일 발표가 있는데 잘 할 수 있을까..?'},
-  ];
+  DateTime currentMonth = DateTime.now();
+
+  //임시 일기 데이터 (나중에 API 연동)
+  Map<String, String> diaries = {
+    '2026-05-01': '오늘은 기분 좋은 하루였다.',
+    '2026-05-04': '오늘은 기분 좋은 하루였다.',
+    '2026-05-13': '오늘은 기분 좋은 하루였다.',
+  };
 
   final List<String> _weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
+  void _previousMonth() {
+    setState(() {
+      currentMonth = DateTime(currentMonth.year, currentMonth.month - 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      currentMonth = DateTime(currentMonth.year, currentMonth.month + 1);
+    });
+  }
+
+  List<MapEntry<String, String>> _getDiariesForCurrentMonth() {
+    String monthKey = DateFormat('yyyy-MM').format(currentMonth);
+
+    return diaries.entries
+        .where((entry) => entry.key.startsWith(monthKey))
+        .toList()
+      ..sort((a, b) => b.key.compareTo(a.key));
+  }
+
+  bool _isToday(String dateString) {
+    DateTime date = DateTime.parse(dateString);
+    DateTime today = DateTime.now();
+
+    return date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<MapEntry<String, String>> monthDiaries = _getDiariesForCurrentMonth();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('일기', style: AppTextStyle.heading3),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: _diaries.isEmpty
-          ? _emptyView()
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: _diaries.length,
-              itemBuilder: (context, index) {
-                final diary = _diaries[index];
-                final date = diary['date'] as DateTime;
-                return _diaryItem(diary, date);
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showDiaryBottomSheet(context, null),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.edit_rounded, color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _diaryItem(Map<String, dynamic> diary, DateTime date) {
-    return GestureDetector(
-      onTap: () => _showDiaryBottomSheet(context, diary),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        elevation: 0,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            //날짜
-            SizedBox(
-              width: 36,
-              child: Column(
-                children: [
-                  Text(date.day.toString(), style: AppTextStyle.heading2),
-                  Text(
-                    _weekdays[date.weekday % 7],
-                    style: AppTextStyle.caption,
-                  ),
-                ],
-              ),
+            IconButton(
+              icon: Icon(Icons.chevron_left, color: AppColors.textSecondary),
+              onPressed: _previousMonth,
             ),
-            const SizedBox(width: 14),
-
-            //내용
-            Expanded(
-              child: Text(
-                diary['content'] ?? '',
-                style: AppTextStyle.body2,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+            Text(
+              DateFormat('yyyy년 MM월').format(currentMonth),
+              style: AppTextStyle.heading2,
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary,
-              size: 17,
+            IconButton(
+              icon: Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              onPressed: _nextMonth,
             ),
           ],
         ),
       ),
-    );
-  }
 
-  Widget _emptyView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('📝', style: TextStyle(fontSize: 48)),
-          const SizedBox(height: 16),
-          Text('아직 작성한 일기가 없어요', style: AppTextStyle.body1),
-          const SizedBox(height: 8),
-          Text('오늘 하루를 기록해보세요 :)', style: AppTextStyle.body2),
-        ],
+      body: monthDiaries.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.edit_note_outlined,
+                    size: 65,
+                    color: AppColors.textPrimary,
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    '이번 달 작성한 일기가 없어요 :(',
+                    style: AppTextStyle.body1.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: monthDiaries.length,
+              itemBuilder: (context, index) {
+                String dateString = monthDiaries[index].key;
+                String content = monthDiaries[index].value;
+                DateTime date = DateTime.parse(dateString);
+                bool isToday = _isToday(dateString);
+
+                return GestureDetector(
+                  onTap: () => _showDiaryBottomSheet(
+                    context,
+                    dateString,
+                    content,
+                    isToday,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.border, width: 1),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        //날짜
+                        SizedBox(
+                          width: 50,
+                          child: Column(
+                            children: [
+                              Text(
+                                date.day.toString(),
+                                style: AppTextStyle.heading2.copyWith(
+                                  color: isToday ? AppColors.primary : AppColors.textPrimary, //오늘이면 primary
+                                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              Text(
+                                _weekdays[date.weekday % 7],
+                                style: AppTextStyle.heading3.copyWith(
+                                  color: isToday ? AppColors.primary : AppColors.textSecondary,
+                                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+
+                        //내용
+                        Expanded(
+                          child: Text(
+                            content.length > 50
+                                ? '${content.substring(0, 50)}...'
+                                : content,
+                            style: AppTextStyle.body1.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.textSecondary,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        onPressed: () => _showDiaryBottomSheet(context, null, null, true),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
   void _showDiaryBottomSheet(
     BuildContext context,
-    Map<String, dynamic>? diary,
+    String? dateString,
+    String? content,
+    bool canEdit,
   ) {
-    final controller = TextEditingController(text: diary?['content'] ?? '');
+    final controller = TextEditingController(text: content ?? '');
+    DateTime date = dateString != null
+        ? DateTime.parse(dateString)
+        : DateTime.now();
 
     showModalBottomSheet(
       context: context,
@@ -138,7 +219,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             ),
             child: Column(
               children: [
-                //핸들바
+                // 핸들바
                 Center(
                   child: Container(
                     width: 40,
@@ -150,15 +231,15 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ),
                   ),
                 ),
-                //헤더
+                // 헤더
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${diary != null ? "${(diary!['date'] as DateTime).month}월 ${(diary!['date'] as DateTime).day}일" : "오늘의 일기"}',
-                        style: AppTextStyle.heading3,
+                        '${date.month}월 ${date.day}일',
+                        style: AppTextStyle.heading2,
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
@@ -174,12 +255,18 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('오늘 하루를 기록해요', style: AppTextStyle.body2),
+                        Text(
+                          canEdit ? '오늘 하루를 기록해요' : '이날의 일기',
+                          style: AppTextStyle.body1.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: controller,
                           maxLines: 10,
-                          style: AppTextStyle.body1,
+                          enabled: canEdit,
+                          style: AppTextStyle.body2,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
@@ -188,41 +275,55 @@ class _DiaryScreenState extends State<DiaryScreen> {
                               borderSide: BorderSide(color: AppColors.border),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              //활성화, 클릭 X
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppColors.border),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              //클릭 O
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: AppColors.primary),
                             ),
+                            disabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppColors.border),
+                            ),
                             hintText: '오늘 하루 어떠셨나요?\n마음껏 털어놓아도 괜찮아요 :)',
-                            hintStyle: AppTextStyle.body2,
+                            hintStyle: AppTextStyle.body1.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              //백엔드 연결 시 실제 저장 구현
-                              Navigator.pop(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                        if (canEdit) ...[
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // 백엔드 연결 시 실제 저장 구현
+                                setState(() {
+                                  String key = DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(date);
+                                  diaries[key] = controller.text;
+                                });
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                content == null ? '저장하기' : '수정하기',
+                                style: AppTextStyle.button,
                               ),
                             ),
-                            child: Text(
-                              diary == null ? '저장하기' : '수정하기',
-                              style: AppTextStyle.button,
-                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),

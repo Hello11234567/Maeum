@@ -5,11 +5,11 @@
 // 날짜 길게 클릭 시 AI 분석 결과 화면으로 이동
 
 import 'package:flutter/material.dart';
-import 'package:maeum/screens/ai_result_screen.dart';
-import 'package:maeum/screens/emoji_select_screen.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/calendar_cell.dart';
+import '../screens/emoji_select_screen.dart';
+import '../screens/ai_result_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -53,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
     return days;
   }
 
-  void _previouseMonth() {
+  void _previousMonth() {
     setState(() {
       _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
     });
@@ -128,7 +128,7 @@ class _MainScreenState extends State<MainScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: _previouseMonth,
+                    onPressed: _previousMonth,
                     icon: const Icon(Icons.chevron_left),
                     color: AppColors.textSecondary,
                   ),
@@ -207,42 +207,65 @@ class _MainScreenState extends State<MainScreen> {
                       onLongPress: () {
                         //백엔드 연결 시 실제 데이터 확인 후 분기
                         //기록 있으면 AI 분석 결과로, 없으면 다이얼로그
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                        bool hasRecord = _myEmojis.containsKey(
+                          date.toIso8601String().substring(0, 10),
+                        );
+
+                        if (hasRecord) {
+                          //기록 있으면 AI 분석 결과 화면으로 이동
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AiResultScreen(
+                                joy: 7.0,
+                                // 나중에 실제 데이터로 교체
+                                anger: 3.0,
+                                anxiety: 2.0,
+                                peace: 8.0,
+                                sadness: 1.0,
+                                mode: 'view',
+                                date: date,
+                              ),
                             ),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  '📭',
-                                  style: TextStyle(fontSize: 36),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  '${date.month}월 ${date.day}일',
-                                  style: AppTextStyle.heading3,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '이날은 기록하지 않았어요',
-                                  style: AppTextStyle.body2,
+                          );
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    '📭',
+                                    style: TextStyle(fontSize: 36),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    '${date.month}월 ${date.day}일',
+                                    style: AppTextStyle.heading3,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '이날은 기록하지 않았어요',
+                                    style: AppTextStyle.body2,
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(
+                                    '확인',
+                                    style: TextStyle(color: AppColors.primary),
+                                  ),
                                 ),
                               ],
                             ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text(
-                                  '확인',
-                                  style: TextStyle(color: AppColors.primary),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                          );
+                        }
                       },
                     );
                   },

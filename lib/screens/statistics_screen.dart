@@ -89,6 +89,36 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 children: [_tabButton('주간', true), _tabButton('월간', false)],
               ),
             ),
+            const SizedBox(height: 16),
+
+            //날짜 네비게이션 추가
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.chevron_left, color: AppColors.textSecondary),
+                  onPressed:() {
+                    //잭엔드 연결 시 날짜 변경 구현
+                    setState(() {
+                      //이번 주/달로 이동
+                    });
+                  },
+                ),
+                Text(
+                  _isWeekly ? '2026년 5월 2주차' : '2026년 5월',
+                  style: AppTextStyle.body1.copyWith(fontWeight: FontWeight.w600),
+                ),
+                IconButton(
+                  icon: Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                  onPressed: () {
+                    //백엔드 연결 시 날짜 변경 구현
+                    setState(() {
+                      //다음 주/달로 이동
+                    });
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
 
             //AI 요약 카드
