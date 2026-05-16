@@ -150,6 +150,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                 _weekdays[date.weekday % 7],
                                 style: AppTextStyle.heading3.copyWith(
                                   color: isToday ? AppColors.primary : AppColors.textSecondary,
+
                                   fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
