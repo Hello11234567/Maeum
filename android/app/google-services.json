@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "455527338653",
+    "project_id": "maeum-f07e8",
+    "storage_bucket": "maeum-f07e8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:455527338653:android:347ee81c56538209ec3a74",
+        "android_client_info": {
+          "package_name": "com.maeum.maeum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmMSytI1uY6cVAtNjkar4i6y20Kcr6W6E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

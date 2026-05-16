@@ -4,16 +4,24 @@
 
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'utils/app_theme.dart';
 import 'utils/constants.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/diary_screen.dart';
+import 'services/fcm_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   KakaoSdk.init(nativeAppKey: AppConstants.kakaoNativeAppKey);
+
+  //FCM 초기화
+  final fcmService = FcmService();
+  await fcmService.initialize();
+
   runApp(const MyApp());
 }
 
