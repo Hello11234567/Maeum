@@ -42,3 +42,6 @@ Flutter 기반 AI 감정 케어 애플리케이션입니다.
 
 ## 📅 개발 기간
 2026.04 ~ 개발중 🚧
+
+## 🔗 연동 프로젝트
+- 📱 Flutter 앱: [maeum-server](https://github.com/Hello11234567/maeum-server)
