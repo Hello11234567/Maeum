@@ -68,7 +68,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
     Future.delayed(const Duration(milliseconds: 500), _animateDots);
   }
 
-  void _analyzeAndNavigate() async {
+  Future<void> _analyzeAndNavigate() async {
     try {
       final response = await ApiService.dio.get(
         '/ai-analysis',
@@ -77,21 +77,23 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
         },
       );
 
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AiResultScreen(
-            mode: 'new',
-            date: null,
-            joy: widget.joy,
-            anger: widget.anger,
-            anxiety: widget.anxiety,
-            peace: widget.peace,
-            sadness: widget.sadness,
+      if (response.statusCode == 200) {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AiResultScreen(
+              mode: 'new',
+              date: null,
+              joy: widget.joy,
+              anger: widget.anger,
+              anxiety: widget.anxiety,
+              peace: widget.peace,
+              sadness: widget.sadness,
+            ),
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

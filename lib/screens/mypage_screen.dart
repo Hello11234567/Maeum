@@ -180,7 +180,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                         Text(_nickname, style: AppTextStyle.heading3),
                         const SizedBox(height: 4),
                         Text(
-                          '🌱 마음이와 함께한 ${_daysWithMaeum}일째',
+                          '🌱 마음이와 함께한 $_daysWithMaeum일째',
                           style: AppTextStyle.body2.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,

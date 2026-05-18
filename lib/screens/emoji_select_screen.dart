@@ -45,7 +45,7 @@ class _EmojiSelectScreenState extends State<EmojiSelectScreen> {
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF8F6F2),
+            color: Color(0xFF8F6F2F),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Padding(
