@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
+import '../services/api_service.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -19,12 +20,31 @@ class DiaryScreen extends StatefulWidget {
 class _DiaryScreenState extends State<DiaryScreen> {
   DateTime currentMonth = DateTime.now();
 
-  //임시 일기 데이터 (나중에 API 연동)
-  Map<String, String> diaries = {
-    '2026-05-01': '오늘은 기분 좋은 하루였다.',
-    '2026-05-04': '오늘은 기분 좋은 하루였다.',
-    '2026-05-13': '오늘은 기분 좋은 하루였다.',
-  };
+  Map<String, String> diaries = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDiaries();
+  }
+
+  //일기 목록 서버에서 불러오기
+  Future<void> _loadDiaries() async {
+    try {
+      final response = await ApiService.dio.get('/diaries/list');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          diaries = {};
+          for (var diary in response.data) {
+            diaries[diary['date']] = diary['content'];
+          }
+        });
+      }
+    } catch (e) {
+      //서버 연결 실패 시 빈 리스트 표시
+    }
+  }
 
   final List<String> _weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -32,12 +52,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
     setState(() {
       currentMonth = DateTime(currentMonth.year, currentMonth.month - 1);
     });
+    _loadDiaries();
   }
 
   void _nextMonth() {
     setState(() {
       currentMonth = DateTime(currentMonth.year, currentMonth.month + 1);
     });
+    _loadDiaries();
   }
 
   List<MapEntry<String, String>> _getDiariesForCurrentMonth() {
@@ -298,15 +320,23 @@ class _DiaryScreenState extends State<DiaryScreen> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
-                                // 백엔드 연결 시 실제 저장 구현
-                                setState(() {
-                                  String key = DateFormat(
-                                    'yyyy-MM-dd',
-                                  ).format(date);
-                                  diaries[key] = controller.text;
-                                });
-                                Navigator.pop(context);
+                              onPressed: () async {
+                                try {
+                                  await ApiService.dio.post(
+                                    '/diaries',
+                                    data: {
+                                      'date': DateFormat('yyyy-MM-dd').format(date),
+                                      'content': controller.text,
+                                    },
+                                  );
+                                  setState(() {
+                                    diaries[DateFormat('yyyy-MM-dd').format(date)] = controller.text;
+                                  });
+                                  if (!context.mounted) return;
+                                  Navigator.pop(context);
+                                } catch (e) {
+                                  //저장 실패
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,

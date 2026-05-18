@@ -20,16 +20,20 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   Future<void> _kakaoLogin() async {
-    //백엔드 연결 후 활성화
-    //setState(() => _isLoading = true);
-    //final success = await _authService.kakaoLogin();
-    //setState(() => _isLoading = true);
-    //if (success && mounted) {
-    //  Navigator.pushReplacementNamed(context, '/main');
-    //}
+    setState(() => _isLoading = true);
 
-    //임시 처리
-    Navigator.pushReplacementNamed(context, '/main');
+    final success = await _authService.kakaoLogin();
+
+    setState(() => _isLoading = false);
+
+    if (success && mounted) {
+      Navigator.pushReplacementNamed(context, '/main');
+    } else if (mounted) {
+      //로그인 실패 시 스낵바 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인에 실패했습니다. 다시 시도해주세요.')),
+      );
+    }
   }
 
   @override

@@ -49,6 +49,9 @@ dependencies:
   #날짜 포맷팅
   intl: ^0.18.0
 
+  #이미지 선택
+  image_picker: ^1.0.4
+
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
 

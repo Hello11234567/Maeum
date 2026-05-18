@@ -7,164 +7,219 @@
 import 'package:flutter/material.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
+import '../services/api_service.dart';
 
-class StatisticsCompareScreen extends StatelessWidget {
+class StatisticsCompareScreen extends StatefulWidget {
   final bool isWeekly;
 
   const StatisticsCompareScreen({super.key, required this.isWeekly});
 
   @override
+  State<StatisticsCompareScreen> createState() =>
+      _StatisticsCompareScreenState();
+}
+
+class _StatisticsCompareScreenState extends State<StatisticsCompareScreen> {
+  //서버에서 받아온 데이터
+  Map<String, double> _currentData = {
+    'joy': 0,
+    'anger': 0,
+    'anxiety': 0,
+    'peace': 0,
+    'sadness': 0,
+  };
+  Map<String, double> _previousData = {
+    'joy': 0,
+    'anger': 0,
+    'anxiety': 0,
+    'peace': 0,
+    'sadness': 0,
+  };
+
+  String _aiSummary = '';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompareData();
+  }
+
+  //서버에서 비교 데이터 불러오기
+  Future<void> _loadCompareData() async {
+    try {
+      final endpoint = widget.isWeekly
+          ? '/statistics/weekly/compare'
+          : '/statistics/monthly/compare';
+
+      final response = await ApiService.dio.get(endpoint);
+
+      if (response.statusCode == 200) {
+        final current = response.data['current'];
+        final previous = response.data['previous'];
+        setState(() {
+          _currentData = {
+            'joy': current['joy'].toDouble(),
+            'anger': current['anger'].toDouble(),
+            'anxiety': current['anxiety'].toDouble(),
+            'peace': current['peace'].toDouble(),
+            'sadness': current['sadness'].toDouble(),
+          };
+          _previousData = {
+            'joy': previous['joy'].toDouble(),
+            'anger': previous['anger'].toDouble(),
+            'anxiety': previous['anxiety'].toDouble(),
+            'peace': previous['peace'].toDouble(),
+            'sadness': previous['sadness'].toDouble(),
+          };
+          _aiSummary = response.data['aiSummary'] ?? '';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    //백엔드 연결 시 실제 데이터로 교체
-    final currentData = {
-      'joy': 7.2,
-      'anger': 3.0,
-      'anxiety': 3.4,
-      'peace': 6.8,
-      'sadness': 2.1,
-    };
-
-    final previousData = {
-      'joy': 5.8,
-      'anger': 4.5,
-      'anxiety': 5.2,
-      'peace': 6.0,
-      'sadness': 2.1,
-    };
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          isWeekly ? '지난주와 비교' : '지난달과 비교',
+          widget.isWeekly ? '지난주와 비교' : '지난달과 비교',
           style: AppTextStyle.heading3,
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            //범례
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
-              ),
+      //로딩 중이면 스피너 표시
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
                   //범례
-                  Row(
-                    children: [
-                      _legendItem(
-                        '이번 ${isWeekly ? '주' : '달'}',
-                        AppColors.primary,
-                      ),
-                      const SizedBox(width: 16),
-                      _legendItem(
-                        '지난 ${isWeekly ? '주' : '달'}',
-                        AppColors.border,
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        //범례
+                        Row(
+                          children: [
+                            _legendItem(
+                              '이번 ${widget.isWeekly ? '주' : '달'}',
+                              AppColors.primary,
+                            ),
+                            const SizedBox(width: 16),
+                            _legendItem(
+                              '지난 ${widget.isWeekly ? '주' : '달'}',
+                              AppColors.border,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        // 서버에서 받아온 데이터 사용
+                        _compareRow(
+                          '😊',
+                          '기쁨',
+                          _currentData['joy']!,
+                          _previousData['joy']!,
+                        ),
+                        _compareRow(
+                          '😌',
+                          '평안',
+                          _currentData['peace']!,
+                          _previousData['peace']!,
+                        ),
+                        _compareRow(
+                          '😤',
+                          '화남',
+                          _currentData['anger']!,
+                          _previousData['anger']!,
+                        ),
+                        _compareRow(
+                          '😰',
+                          '불안',
+                          _currentData['anxiety']!,
+                          _previousData['anxiety']!,
+                        ),
+                        _compareRow(
+                          '😔',
+                          '슬픔',
+                          _currentData['sadness']!,
+                          _previousData['sadness']!,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  // 감정별 비교
-                  _compareRow(
-                    '😊',
-                    '기쁨',
-                    currentData['joy']!,
-                    previousData['joy']!,
-                  ),
-                  _compareRow(
-                    '😌',
-                    '평안',
-                    currentData['peace']!,
-                    previousData['peace']!,
-                  ),
-                  _compareRow(
-                    '😤',
-                    '화남',
-                    currentData['anger']!,
-                    previousData['anger']!,
-                  ),
-                  _compareRow(
-                    '😰',
-                    '불안',
-                    currentData['anxiety']!,
-                    previousData['anxiety']!,
-                  ),
-                  _compareRow(
-                    '😔',
-                    '슬픔',
-                    currentData['sadness']!,
-                    previousData['sadness']!,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
 
-            //AI 변화 요약
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.15),
-                    AppColors.secondary.withValues(alpha: 0.15),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.secondary],
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          'AI',
-                          style: AppTextStyle.caption.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  //AI 변화 요약
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.15),
+                          AppColors.secondary.withValues(alpha: 0.15),
+                        ],
                       ),
-                      const SizedBox(width: 7),
-                      Text(
-                        '${isWeekly ? '지난주' : '지난달'} 대비 변화',
-                        style: AppTextStyle.body2,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  //백엔드 연결 시 실제 AI 요약으로 교체
-                  Text(
-                    isWeekly
-                        ? '지난주보다 기쁨·평안이 오르고 화남·불안이 줄었어요. 이 흐름 계속 이어가봐요 :)'
-                        : '지난달보다 전반적으로 좋아졌어요! 불안과 화남이 크게 줄었네요 :)',
-                    style: AppTextStyle.body2,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.primary,
+                                    AppColors.secondary,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '마음이',
+                                style: AppTextStyle.caption.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 7),
+                            Text(
+                              '${widget.isWeekly ? '지난주' : '지난달'} 대비 변화',
+                              style: AppTextStyle.body2,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        //서버에서 받아온 AI 요약 사용
+                        Text(
+                          _aiSummary.isNotEmpty ? _aiSummary : '마음이가 정리중이에요 :)',
+                          style: AppTextStyle.body2,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -199,14 +254,20 @@ class StatisticsCompareScreen extends StatelessWidget {
     // 화남, 불안, 슬픔은 내려가면 좋은 것 → 초록
     final isPositive = (name == '기쁨' || name == '평안') ? isUp : !isUp;
 
-    Color _getEmotionColor(String name) {
+    Color getEmotionColor(String name) {
       switch (name) {
-        case '기쁨': return AppColors.joy;
-        case '평안': return AppColors.peace;
-        case '화남': return AppColors.anger;
-        case '불안': return AppColors.anxiety;
-        case '슬픔': return AppColors.sadness;
-        default: return AppColors.primary;
+        case '기쁨':
+          return AppColors.joy;
+        case '평안':
+          return AppColors.peace;
+        case '화남':
+          return AppColors.anger;
+        case '불안':
+          return AppColors.anxiety;
+        case '슬픔':
+          return AppColors.sadness;
+        default:
+          return AppColors.primary;
       }
     }
 
@@ -230,7 +291,7 @@ class StatisticsCompareScreen extends StatelessWidget {
                           value: current / 10,
                           backgroundColor: AppColors.border,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            _getEmotionColor(name),
+                            getEmotionColor(name),
                           ),
                           minHeight: 7,
                         ),
@@ -260,7 +321,7 @@ class StatisticsCompareScreen extends StatelessWidget {
                           value: previous / 10,
                           backgroundColor: AppColors.border,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            _getEmotionColor(name).withValues(alpha: 0.35),
+                            getEmotionColor(name).withValues(alpha: 0.35),
                           ),
                           minHeight: 7,
                         ),

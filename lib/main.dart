@@ -12,11 +12,13 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/diary_screen.dart';
 import 'services/fcm_service.dart';
+import 'services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   KakaoSdk.init(nativeAppKey: AppConstants.kakaoNativeAppKey);
+  ApiService.init();
 
   //FCM 초기화
   final fcmService = FcmService();

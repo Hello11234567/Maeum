@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:dio/dio.dart';
 import '../utils/constants.dart';
+import 'api_service.dart';
 
 class AuthService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -45,6 +46,12 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    try {
+      //서버에서 Refresh Token 삭제
+      await ApiService.dio.post('/auth/logout');
+    } catch (e) {
+      //에러 무시하고 로컬 토큰 삭제 진행
+    }
     await UserApi.instance.logout();
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
@@ -57,7 +64,7 @@ class AuthService {
 
   Future<bool> isLoggedIn() async {
     //앱 켤 때 로그인 상태 확인
-    final token = await _storage.read(key: 'refresh.token');
+    final token = await _storage.read(key: 'refresh_token');
 
     return token != null;
   }

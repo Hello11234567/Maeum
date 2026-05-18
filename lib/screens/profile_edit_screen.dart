@@ -3,9 +3,12 @@
 // 백엔드 연결 시 실제 저장 구현
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/custom_button.dart';
+import '../services/api_service.dart';
+import 'dart:io';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -17,15 +20,14 @@ class ProfileEditScreen extends StatefulWidget {
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _introController = TextEditingController();
-  String? _profileImageUrl; //백엔드 연결 시 실제 이미지 URL
-  String? _selectedAgeRange; //백엔드 연결 시 기존 값 불러오기
+  String? _profileImageUrl;
+  String? _selectedAgeRange;
+  File? _selectedImage;
 
   @override
   void initState() {
     super.initState();
-    //백엔드 연결 시 기존 정보 불러오기
-    _nicknameController.text = '사용자';
-    _introController.text = '';
+    _loadUserData();
   }
 
   @override
@@ -33,6 +35,36 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     _nicknameController.dispose();
     _introController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final response = await ApiService.dio.get('/users/me');
+      if (response.statusCode == 200) {
+        setState(() {
+          _nicknameController.text = response.data['nickname'] ?? '';
+          _introController.text = response.data['intro'] ?? '';
+          _selectedAgeRange = response.data['ageRange'];
+          _profileImageUrl = response.data['profileImage'];
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
   }
 
   void _showWithdrawDialog() {
@@ -50,14 +82,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context); //다이얼로그 닫기
-              //백엔드 연결시 회원탈퇴 API 호출
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/login',
-                (route) => false, //모든 화면 스택 제거
-              );
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await ApiService.dio.delete('/users/me');
+                if (!context.mounted) return;
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false, //모든 화면 스택 제거
+                );
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('탈퇴에 실패했습니다. 다시 시도해주세요.')),
+                );
+              }
             },
             child: Text('탈퇴하기', style: TextStyle(color: Colors.red[400])),
           ),
@@ -84,9 +124,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             //프로필 이미지
             Center(
               child: GestureDetector(
-                onTap: () {
-                  //백엔드 연결 시 이미지 선택 구현
-                },
+                onTap: () => _pickImage(),
+
                 child: Stack(
                   children: [
                     Container(
@@ -98,7 +137,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: _profileImageUrl != null
+                      child: _selectedImage != null
+                          ? ClipOval(
+                              child: Image.file(
+                                _selectedImage!,
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : _profileImageUrl != null
                           ? ClipOval(
                               child: Image.network(
                                 _profileImageUrl!,
@@ -192,9 +240,24 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             //저장 버튼
             CustomButton(
               text: '저장하기',
-              onPressed: () {
-                //백엔드 연결 시 실제 저장 구현
-                Navigator.pop(context);
+              onPressed: () async {
+                try {
+                  await ApiService.dio.put(
+                    '/users/me',
+                    data: {
+                      'nickname': _nicknameController.text,
+                      'intro': _introController.text,
+                      'ageRange': _selectedAgeRange,
+                    },
+                  );
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('저장에 실패했습니다. 다시 시도해주세요.')),
+                  );
+                }
               },
             ),
             const SizedBox(height: 16),

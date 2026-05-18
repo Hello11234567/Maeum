@@ -5,11 +5,13 @@
 // 날짜 길게 클릭 시 AI 분석 결과 화면으로 이동
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/calendar_cell.dart';
 import '../screens/emoji_select_screen.dart';
 import '../screens/ai_result_screen.dart';
+import '../services/api_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -23,6 +25,43 @@ class _MainScreenState extends State<MainScreen> {
 
   //날짜별 내 이모지 저장(백엔드 연결 시 서버에서 불러오도록 수정)
   final Map<String, String> _myEmojis = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEmojis();
+  }
+
+  //캘린더 이모지 서버에서 불러오기
+  Future<void> _loadEmojis() async {
+    try {
+      final firstDay = DateTime(_currentMonth.year, _currentMonth.month, 1);
+      final lastDay = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+
+      final response = await ApiService.dio.get(
+        '/emotions',
+        queryParameters: {
+          'startDate': DateFormat('yyyy-MM-dd').format(firstDay),
+          'endDate': DateFormat('yyyy-MM-dd').format(lastDay),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          for (var record in response.data) {
+            final date = record['date'];
+            final emoji = record['myEmoji'] ?? record['aiEmoji'];
+
+            if (emoji != null) {
+              _myEmojis[date] = emoji;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      //에러 무시 (임시 데이터 유지)
+    }
+  }
 
   //해당 월의 날짜 목록 생성
   List<DateTime?> _getDaysInMonth() {
@@ -57,12 +96,14 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
     });
+    _loadEmojis();
   }
 
   void _nextMonth() {
     setState(() {
       _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
     });
+    _loadEmojis();
   }
 
   bool _isToday(DateTime date) {
@@ -196,11 +237,10 @@ class _MainScreenState extends State<MainScreen> {
                           builder: (context) =>
                               EmojiSelectScreen(selectedDate: date),
                         );
-                        //백엔드 연결 시 서버에 저장하도록 수정
+                        //이미지 선택 시 서버에 저장
                         if (result != null) {
                           setState(() {
-                            _myEmojis[date.toIso8601String().substring(0, 10)] =
-                                result;
+                            _myEmojis[date.toIso8601String().substring(0, 10)] = result;
                           });
                         }
                       },

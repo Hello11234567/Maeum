@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/custom_button.dart';
+import '../services/api_service.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -27,81 +28,128 @@ class _NotificationScreenState extends State<NotificationScreen> {
   bool _weeklyNotification = true; //주간 마감 알림
   bool _monthlyNotification = true; //월간 마감 알림
 
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationSettings();
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    try {
+      //전체 알림 설정 조회
+      final userResponse = await ApiService.dio.get('/users/me');
+      //세부 알림 설정 조회
+      final settingsResponse = await ApiService.dio.get(
+          '/notifications/settings');
+
+      if (userResponse.statusCode == 200 &&
+          settingsResponse.statusCode == 200) {
+        setState(() {
+          _notificationsEnabled =
+              userResponse.data['notificationsEnabled'] ?? false;
+          _recordNotification =
+              settingsResponse.data['recordNotification'] ?? false;
+          _weeklyNotification =
+              settingsResponse.data['weeklyNotification'] ?? true;
+          _monthlyNotification =
+              settingsResponse.data['monthlyNotification'] ?? true;
+
+          //알림 시간 설정
+          final timeString = settingsResponse.data['notificationTime'];
+          if (timeString != null) {
+            final parts = timeString.split(':');
+            _notificationTime = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
+  }
+
   Future<void> _selectTime(BuildContext context) async {
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: 280,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            // 핸들바
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+      builder: (context) =>
+          Container(
+            height: 280,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            // 확인 버튼
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      '취소',
-                      style: TextStyle(color: AppColors.textSecondary),
+            child: Column(
+              children: [
+                // 핸들바
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      '확인',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                ),
+                // 확인 버튼
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          '취소',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
                       ),
-                    ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          '확인',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            // iOS 스타일 타임피커
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.time,
-                initialDateTime: DateTime(
-                  2026,
-                  1,
-                  1,
-                  _notificationTime.hour,
-                  _notificationTime.minute,
                 ),
-                use24hFormat: false,
-                onDateTimeChanged: (DateTime newTime) {
-                  setState(() {
-                    _notificationTime = TimeOfDay(
-                      hour: newTime.hour,
-                      minute: newTime.minute,
-                    );
-                  });
-                },
-              ),
+                // iOS 스타일 타임피커
+                Expanded(
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.time,
+                    initialDateTime: DateTime(
+                      2026,
+                      1,
+                      1,
+                      _notificationTime.hour,
+                      _notificationTime.minute,
+                    ),
+                    use24hFormat: false,
+                    onDateTimeChanged: (DateTime newTime) {
+                      setState(() {
+                        _notificationTime = TimeOfDay(
+                          hour: newTime.hour,
+                          minute: newTime.minute,
+                        );
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -283,9 +331,34 @@ class _NotificationScreenState extends State<NotificationScreen> {
           //저장 버튼
           CustomButton(
             text: '저장하기',
-            onPressed: () {
-              //백엔드 연결 시 실제 저장 구현
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                //전체 알림 On/OFF 저장
+                await ApiService.dio.put('/users/me/notifications',
+                  queryParameters: {'enabled': _notificationsEnabled},
+                );
+
+                //세부 알림 설정 저장
+                await ApiService.dio.put('/notifications/settings',
+                    data: {
+                      'recordNotification': _recordNotification,
+                      'notificationTime': '${_notificationTime.hour
+                          .toString()
+                          .padLeft(2, '0')}:${_notificationTime.minute
+                          .toString().padLeft(2, '0')}',
+                      'weeklyNotification': _weeklyNotification,
+                      'monthlyNotification': _monthlyNotification,
+                    },
+                );
+
+                if (!context.mounted) return;
+                Navigator.pop(context);
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('저장에 실패했습니다. 다시 시도해주세요.')),
+                );
+              }
             },
           ),
         ],

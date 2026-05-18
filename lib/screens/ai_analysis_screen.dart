@@ -6,12 +6,15 @@
 // 백엔드 연결 시 실제 데이터 연동
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/emotion_slider.dart';
 import '../widgets/custom_button.dart';
 import 'ai_loading_screen.dart';
 import '../screens/diary_write_screen.dart';
+import 'ai_result_screen.dart';
+import '../services/api_service.dart';
 
 class AiAnalysisScreen extends StatefulWidget {
   const AiAnalysisScreen({super.key});
@@ -28,7 +31,6 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
   double _peace = 5;
   double _sadness = 5;
 
-  //백엔드 연결 시 실제 값으로 교체
   bool _isFirstAnalysis = true; //첫 분석 여부
   bool _hasDiaryToday = false; //오늘 일기 작성 여부
   bool _hasAnalyzedToday = false; //오늘 이미 분석했는지
@@ -36,13 +38,80 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
   @override
   void initState() {
     super.initState();
+    _loadData();
+  }
+
+  //서버에서 데이터 불러오기
+  Future<void> _loadData() async {
+    try {
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      //오늘 일기 있는지 확인
+      final diaryResponse = await ApiService.dio.get('/diaries?date=$today');
+      setState(() {
+        _hasDiaryToday = diaryResponse.statusCode == 200;
+      });
+
+      //오늘 이미 분석했는지 확인
+      final analysisResponse = await ApiService.dio.get(
+        '/ai-analysis?date=$today',
+      );
+      setState(() {
+        _hasAnalyzedToday = analysisResponse.statusCode == 200;
+      });
+
+      //유저 정보 조회 (첫 분석 여부)
+      final userResponse = await ApiService.dio.get('/users/me');
+      setState(() {
+        _isFirstAnalysis = userResponse.data['nickname'] == null;
+      });
+
+      //오늘 감정 기록 있으면 기존 수치 불러오기
+      final emotionResponse = await ApiService.dio.get(
+        '/emotions',
+        queryParameters: {'startDate': today, 'endDate': today},
+      );
+      if (emotionResponse.statusCode == 200 &&
+          emotionResponse.data.isNotEmpty) {
+        final record = emotionResponse.data[0];
+        setState(() {
+          _joy = record['joy'].toDouble();
+          _anger = record['anger'].toDouble();
+          _anxiety = record['anxiety'].toDouble();
+          _peace = record['peace'].toDouble();
+          _sadness = record['sadness'].toDouble();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowPopup();
     });
   }
 
   void _checkAndShowPopup() {
-    if (_isFirstAnalysis) {
+    if (_hasAnalyzedToday) {
+      //오늘 이미 분석했으면 결과 화면으로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AiResultScreen(
+            joy: _joy,
+            anger: _anger,
+            anxiety: _anxiety,
+            peace: _peace,
+            sadness: _sadness,
+            mode: 'new',
+          ),
+        ),
+      );
+    } else if (_isFirstAnalysis) {
       _showWelcomePopup();
     } else if (!_hasDiaryToday) {
       _showDiaryPopup();
@@ -142,8 +211,20 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                //백엔드 연결 시 저장
+              //서버에 닉네임, 나이대, 소개 저장
+              onPressed: () async {
+                try {
+                  await ApiService.dio.put(
+                    '/users/me',
+                    data: {
+                      'nickname': nicknameController.text,
+                      'intro': introController.text,
+                    },
+                  );
+                } catch (e) {
+                  //저장 실패
+                }
+                if (!context.mounted) return;
                 Navigator.pop(context);
                 if (!_hasDiaryToday) _showDiaryPopup();
               },
@@ -180,7 +261,7 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              '일기를 작성하시면 AI가\n좀 더 자세히 분석해드려요 :)',
+              '일기를 작성해주시면 마음이가\n더 깊이 공감해드릴 수 있어요 :)',
               style: AppTextStyle.body2,
               textAlign: TextAlign.center,
             ),
@@ -200,14 +281,18 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
               ),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
+                  //일기 작성 후 돌아왔을 때 _hasDiaryToday 업데이트
+                  onPressed: () async {
                     Navigator.pop(context); //팝업 닫기
-                    Navigator.push(
+                    final saved = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const DiaryWriteScreen(),
                       ),
                     );
+                    if (saved == true) {
+                      setState(() => _hasDiaryToday = true);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -302,22 +387,41 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
             ),
             const SizedBox(height: 32),
 
-            //분석하기 버튼
+            //분석하기 버튼, 서버에 감정 수치 저장 후 로딩 화면으로 이동
             CustomButton(
               text: '오늘의 마음 살피러 가기',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (contex) => AiLoadingScreen(
-                      joy: _joy,
-                      anger: _anger,
-                      anxiety: _anxiety,
-                      peace: _peace,
-                      sadness: _sadness,
+              onPressed: () async {
+                try {
+                  await ApiService.dio.post(
+                    '/ai-analysis',
+                    data: {
+                      'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                      'joy': _joy,
+                      'anger': _anger,
+                      'anxiety': _anxiety,
+                      'peace': _peace,
+                      'sadness': _sadness,
+                    },
+                  );
+                  if (!context.mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AiLoadingScreen(
+                        joy: _joy,
+                        anger: _anger,
+                        anxiety: _anxiety,
+                        peace: _peace,
+                        sadness: _sadness,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('오류가 발생했습니다. 다시 시도 해주세요.')),
+                  );
+                }
               },
             ),
             const SizedBox(height: 20),

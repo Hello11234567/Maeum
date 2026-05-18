@@ -5,9 +5,11 @@
 // 백엔드 연결 시 실제 저장 구현
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/custom_button.dart';
+import '../services/api_service.dart';
 
 class DiaryWriteScreen extends StatefulWidget {
   const DiaryWriteScreen({super.key});
@@ -74,11 +76,21 @@ class _DiaryWriteScreenState extends State<DiaryWriteScreen> {
             ),
             const SizedBox(height: 16),
             CustomButton(
-              text: '저장하고 분석 받기',
-              onPressed: () {
-                // 백엔드 연결 시 실제 저장 구현
-                // 저장 후 AI 분석 화면으로 이동
-                Navigator.pop(context);
+              text: '마음이에게 보내기',
+              onPressed: () async {
+                try {
+                  await ApiService.dio.post(
+                    '/diaries',
+                    data: {
+                      'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                      'content': _controller.text,
+                    },
+                  );
+                  if (!context.mounted) return;
+                  Navigator.pop(context, true);
+                } catch (e) {
+                  //저장 실패
+                }
               },
             ),
             const SizedBox(height: 16),

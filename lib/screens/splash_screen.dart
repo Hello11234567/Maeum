@@ -3,7 +3,10 @@
 // 로그인 여부 확인 후 로그인 화면 또는 메인 화면으로 이동
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dio/dio.dart';
 import '../services/auth_service.dart';
+import '../services/api_service.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 
@@ -51,11 +54,27 @@ class _SplashScreenState extends State<SplashScreen>
     final isLoggedIn = await _authService.isLoggedIn();
     if (!mounted) return;
 
-    //로그인 여부에 따라 화면 이동 (나중에 연결)
-    Navigator.pushReplacementNamed(
-      context,
-      isLoggedIn ? '/main' : '/login', //로그인 O => 메인, 로그인 X => 로그인 화면
-    );
+    if (isLoggedIn) {
+      //Refresh Token으로 Access Token 자동 재발급
+      try {
+        final storage = const FlutterSecureStorage();
+        final refreshToken = await storage.read(key: 'refresh_token');
+
+        await ApiService.dio.post(
+          '/auth/refresh',
+          options: Options(headers: {'Refresh-Token': refreshToken}),
+        );
+
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/main');
+      } catch (e) {
+        //재발급 실패 -> 로그인 화면
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override

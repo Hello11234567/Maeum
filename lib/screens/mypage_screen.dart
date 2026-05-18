@@ -10,6 +10,8 @@ import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../screens/profile_edit_screen.dart';
 import '../screens/notification_screen.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -20,9 +22,9 @@ class MyPageScreen extends StatefulWidget {
 
 class _MyPageScreenState extends State<MyPageScreen> {
   String _version = '';
-  String? _profileImageUrl; //백엔드 연결 시 실제 이미지 URL로 교체
+  String? _profileImageUrl;
+  String _nickname = '사용자';
 
-  //백엔드 연결 시 서버에서 불러오도록 수정
   int _totalDays = 0;
   int _thisMonthDays = 0;
   int _aiCount = 0;
@@ -32,6 +34,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
   void initState() {
     super.initState();
     _loadVersion();
+    _loadUserData();
   }
 
   Future<void> _loadVersion() async {
@@ -39,6 +42,33 @@ class _MyPageScreenState extends State<MyPageScreen> {
     setState(() {
       _version = info.version;
     });
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      //유저 정보 조회
+      final userResponse = await ApiService.dio.get('/users/me');
+
+      //통계 조회
+      final statsResponse = await ApiService.dio.get('/users/me/stats');
+
+      if (userResponse.statusCode == 200 && statsResponse.statusCode == 200) {
+        setState(() {
+          _nickname = userResponse.data['nickname'] ?? '사용자';
+          _profileImageUrl = userResponse.data['profileImage'];
+          _totalDays = statsResponse.data['totalDays'];
+          _thisMonthDays = statsResponse.data['thisMonthDays'];
+          _aiCount = statsResponse.data['aiCount'];
+          _daysWithMaeum = statsResponse.data['daysWithMaeum'];
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
   }
 
   //아이콘 출처
@@ -74,9 +104,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
             child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              //백엔드 연결 시 토큰 삭제 후 로그인 화면으로 이동
+              final authService = AuthService();
+              await authService.logout();
+              if (!context.mounted) return;
               Navigator.pushReplacementNamed(context, '/login');
             },
             child: Text('로그아웃', style: TextStyle(color: Colors.red[400])),
@@ -126,7 +158,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
                         ),
                         shape: BoxShape.circle,
                       ),
-                      //백엔드 연결 시 실제 프로필 이미지로 교체
                       child: _profileImageUrl != null
                           ? ClipOval(
                               child: Image.network(
@@ -146,8 +177,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        //백엔드 연결 시 실제 닉네임으로 교체
-                        Text('사용자', style: AppTextStyle.heading3),
+                        Text(_nickname, style: AppTextStyle.heading3),
                         const SizedBox(height: 4),
                         Text(
                           '🌱 마음이와 함께한 ${_daysWithMaeum}일째',
@@ -164,7 +194,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 //감정 통계
                 Row(
                   children: [
-                    //백엔드 연결 시 실제 데이터로 교체
                     _statItem(_totalDays.toString(), '총 기록\n일수'),
                     _dividerVertical(),
                     _statItem(_thisMonthDays.toString(), '이번 달\n기록'),

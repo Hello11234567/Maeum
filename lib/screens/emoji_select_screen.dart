@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
+import '../services/api_service.dart';
 
 class EmojiSelectScreen extends StatefulWidget {
   final DateTime selectedDate;
@@ -158,9 +159,23 @@ class _EmojiSelectScreenState extends State<EmojiSelectScreen> {
                     child: ElevatedButton(
                       onPressed: _selectedEmoji == null
                           ? null
-                          : () {
-                              //나중에 백엔드 연결 시 저장
-                              Navigator.pop(context, _selectedEmoji);
+                          : () async {
+                              try {
+                                await ApiService.dio.post(
+                                  '/emotions/my-emoji',
+                                  data: {
+                                    'date': widget.selectedDate.toIso8601String().substring(0, 10),
+                                    'myEmoji': _selectedEmoji,
+                                  },
+                                );
+                                if (!context.mounted) return;
+                                Navigator.pop(context, _selectedEmoji);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('저장에 실패했습니다. 다시 시도해주세요.')),
+                                );
+                              }
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,

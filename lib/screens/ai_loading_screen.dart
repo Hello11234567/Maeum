@@ -5,9 +5,11 @@
 // 백엔드 연결 시 실제 OpenAI API 호출
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import 'ai_result_screen.dart';
+import '../services/api_service.dart';
 
 class AiLoadingScreen extends StatefulWidget {
   final double joy;
@@ -55,24 +57,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
 
     // 백엔드 연결 시 실제 API 호출 후 이동
     // 임시로 3초 후 결과 화면으로 이동
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AiResultScreen(
-              mode: 'new',
-              date: null,
-              joy: widget.joy,
-              anger: widget.anger,
-              anxiety: widget.anxiety,
-              peace: widget.peace,
-              sadness: widget.sadness,
-            ),
-          ),
-        );
-      }
-    });
+    Future.microtask(() => _analyzeAndNavigate());
   }
 
   void _animateDots() {
@@ -81,6 +66,39 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
       _dotCount = _dotCount % 3 + 1;
     });
     Future.delayed(const Duration(milliseconds: 500), _animateDots);
+  }
+
+  void _analyzeAndNavigate() async {
+    try {
+      final response = await ApiService.dio.get(
+        '/ai-analysis',
+        queryParameters: {
+          'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        },
+      );
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AiResultScreen(
+            mode: 'new',
+            date: null,
+            joy: widget.joy,
+            anger: widget.anger,
+            anxiety: widget.anxiety,
+            peace: widget.peace,
+            sadness: widget.sadness,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('분석에 실패했습니다. 다시 시도 해주세요.')),
+      );
+      Navigator.pop(context);
+    }
   }
 
   @override
