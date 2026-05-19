@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -17,7 +19,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
@@ -29,6 +31,15 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        //local.properties에서 카카오 앱 키 읽기
+        val props = Properties()
+        val propsFile = rootProject.file("local.properties")
+        if (propsFile.exists()) {
+            propsFile.inputStream().use { props.load(it) }
+        }
+        manifestPlaceholders["kakaoNativeAppKey"] = props["kakao.native.app.key"] as String? ?: ""
+        println("카카오 앱 키: ${props["kakao.native.app.key"]}")
     }
 
     buildTypes {
