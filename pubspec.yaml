@@ -34,14 +34,13 @@ dependencies:
   #HTTP 통신
   dio: ^5.3.2
 
-  #카카오 로그인
-  kakao_flutter_sdk_user: ^1.6.1
+
 
   #로컬 저장소 (토큰 저장)
   flutter_secure_storage: ^9.0.0
 
   #Lottie 애니메이션
-  lottie: ^2.7.0
+  lottie: ^3.0.0
 
   #앱 버전 정보
   package_info_plus: ^8.0.0
@@ -52,12 +51,16 @@ dependencies:
   #이미지 선택
   image_picker: ^1.0.4
 
+  #env파일 읽기
+  flutter_dotenv: ^5.1.0
+
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  kakao_flutter_sdk: ^2.0.0+1
 
 dev_dependencies:
   flutter_test:
@@ -82,6 +85,8 @@ flutter:
   uses-material-design: true
   assets:
       - assets/icons/
+      - assets/lottie/
+      - .env
 
   # To add assets to your application, add an assets section, like this:
   # assets:

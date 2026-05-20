@@ -26,8 +26,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = false);
 
-    if (success && mounted) {
-      Navigator.pushReplacementNamed(context, '/main');
+    if (success) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/main');
+        }
+      });
     } else if (mounted) {
       //로그인 실패 시 스낵바 표시
       ScaffoldMessenger.of(context).showSnackBar(

@@ -17,11 +17,15 @@ class AuthService {
   Future<bool> kakaoLogin() async {
     try {
       OAuthToken token;
+      /*
       if (await isKakaoTalkInstalled()) {
         token = await UserApi.instance.loginWithKakaoTalk();
       } else {
         token = await UserApi.instance.loginWithKakaoAccount();
-      }
+      }*/
+      print('카카오 로그인 시작');
+      token = await UserApi.instance.loginWithKakaoAccount();
+      print('카카오 토큰: ${token.accessToken}');
 
       final response = await _dio.post(
         '${AppConstants.baseUrl}/auth/kakao/login',
@@ -41,6 +45,8 @@ class AuthService {
       }
       return false;
     } catch (e) {
+      print('카카오 로그인 에러: $e');
+      print('에러 타입: ${e.runtimeType}');
       return false;
     }
   }

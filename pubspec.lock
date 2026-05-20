@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: archive
-      sha256: cb6a278ef2dbb298455e1a713bda08524a175630ec643a242c399c932a0a1f7d
+      sha256: a96e8b390886ee8abb49b7bd3ac8df6f451c621619f52a26e815fdcf568959ff
       url: "https://pub.dev"
     source: hosted
-    version: "3.6.1"
+    version: "4.0.9"
   args:
     dependency: transitive
     description:
@@ -246,6 +246,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_dotenv:
+    dependency: "direct main"
+    description:
+      name: flutter_dotenv
+      sha256: b7c7be5cd9f6ef7a78429cabd2774d3c4af50e79cb2b7593e3d5d763ef95c61b
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -464,30 +472,78 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.11.0"
+  kakao_flutter_sdk:
+    dependency: "direct main"
+    description:
+      name: kakao_flutter_sdk
+      sha256: "7103f5cd2d353d5441286df482dfe11d814c32708408dc64e454ba0619bbe3e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
   kakao_flutter_sdk_auth:
     dependency: transitive
     description:
       name: kakao_flutter_sdk_auth
-      sha256: b610ebf2a74aafc543141f1edf7d3ed82fcabcc1317181895151b1fe8f9d62d9
+      sha256: a1f084dace56050fc3bc12cea9504d82d99977153ce9beb6d7c1bb191f92f235
       url: "https://pub.dev"
     source: hosted
-    version: "1.10.0"
+    version: "2.0.0+1"
   kakao_flutter_sdk_common:
     dependency: transitive
     description:
       name: kakao_flutter_sdk_common
-      sha256: e00122b2a6158853adfbb8d51f71f11f7c2cbbbe21f29b0d7494b0de5ec5e4fd
+      sha256: cc8685d91d3f741aed1e1ba4b54bca283cb929e60f61c91bbe9355e93b62d35b
       url: "https://pub.dev"
     source: hosted
-    version: "1.10.0"
+    version: "2.0.0+1"
+  kakao_flutter_sdk_friend:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_friend
+      sha256: "982f89cf1c541f8c332f1f418dc1ec8742514d450bccea6b4e26cc102956aff8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
+  kakao_flutter_sdk_navi:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_navi
+      sha256: "8afa18186f20d05d8df88f6e7ea4199e64919d06263aea8a85c6f3631f2271d9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
+  kakao_flutter_sdk_share:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_share
+      sha256: cfb0b86c74e7e0f3375e7781834ea00898bd05880e96687baad323e175179d9c
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
+  kakao_flutter_sdk_talk:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_talk
+      sha256: fd4e53a6bce6f01376f552193bbf7439dc2d9af1f59e6f2a225257bca3ea4ebb
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
+  kakao_flutter_sdk_template:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_template
+      sha256: "6aefae6d6e89f9b1ca5fd51bfc5581d8df08c39a9e8c9cd79bcc22568c8a95ef"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
   kakao_flutter_sdk_user:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: kakao_flutter_sdk_user
-      sha256: "33d44bd2c25ea922078c6ab3eb33d978745d8f9c1920927f4745141e08ea5e57"
+      sha256: c5420bc08413f172d52332a8270237bb249066a9a82338b301441785d28248e1
       url: "https://pub.dev"
     source: hosted
-    version: "1.10.0"
+    version: "2.0.0+1"
   leak_tracker:
     dependency: transitive
     description:
@@ -532,10 +588,10 @@ packages:
     dependency: "direct main"
     description:
       name: lottie
-      sha256: a93542cc2d60a7057255405f62252533f8e8956e7e06754955669fd32fb4b216
+      sha256: "8b6359a7422167014aa73ce763fa133fb832065dcc0ac4d1dec1f603a5cef7d0"
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.0"
+    version: "3.3.3"
   matcher:
     dependency: transitive
     description:
@@ -704,6 +760,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.9.1"
+  posix:
+    dependency: transitive
+    description:
+      name: posix
+      sha256: "185ef7606574f789b40f289c233efa52e96dead518aed988e040a10737febb07"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.5.0"
   pub_semver:
     dependency: transitive
     description:
@@ -877,6 +941,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  webview_flutter:
+    dependency: transitive
+    description:
+      name: webview_flutter
+      sha256: a3da219916aba44947d3a5478b1927876a09781174b5a2b67fa5be0555154bf9
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.13.1"
+  webview_flutter_android:
+    dependency: transitive
+    description:
+      name: webview_flutter_android
+      sha256: ad5182eff9a550925330cb9f0cb038eddfdd5712aba8b77aa0f0400e50f6e688
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.12.0"
+  webview_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: webview_flutter_platform_interface
+      sha256: "1221c1b12f5278791042f2ec2841743784cf25c5a644e23d6680e5d718824f04"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.15.1"
+  webview_flutter_wkwebview:
+    dependency: transitive
+    description:
+      name: webview_flutter_wkwebview
+      sha256: "82648217f537573e1ca9ae9952d3eacedca6ab5aee69dc84445fc763766dcea2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.25.1"
   win32:
     dependency: transitive
     description:

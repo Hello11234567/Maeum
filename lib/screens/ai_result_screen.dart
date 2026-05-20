@@ -8,6 +8,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import '../widgets/ai_card.dart';
@@ -75,13 +76,13 @@ class _AiResultScreenState extends State<AiResultScreen> {
   }
 
   //감정에 맞는 캐릭터 표정 반환
-  String _getCharacterEmoji() {
-    if (widget.joy >= 7) return '😊';
-    if (widget.anger >= 7) return '😤';
-    if (widget.anxiety >= 7) return '😰';
-    if (widget.peace >= 7) return '😌';
-    if (widget.sadness >= 7) return '😢';
-    return '🙂';
+  String _getLottieAsset() {
+    if (widget.joy >= 7) return 'assets/lottie/lottie_joy.json';
+    if (widget.anger >= 7) return 'assets/lottie/lottie_anger.json';
+    if (widget.anxiety >= 7) return 'assets/lottie/lottie_anxiety.json';
+    if (widget.peace >= 7) return 'assets/lottie/lottie_peace.json';
+    if (widget.sadness >= 7) return 'assets/lottie/lottie_sadness.json';
+    return 'assets/lottie/lottie_default.json';
   }
 
   @override
@@ -116,24 +117,10 @@ class _AiResultScreenState extends State<AiResultScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       //캐릭터
-                      Container(
+                      Lottie.asset(
+                        _getLottieAsset(),
                         width: 70,
                         height: 70,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.primary.withValues(alpha: 0.2),
-                              AppColors.secondary.withValues(alpha: 0.2),
-                            ],
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            _getCharacterEmoji(),
-                            style: const TextStyle(fontSize: 36),
-                          ),
-                        ),
                       ),
                       const SizedBox(width: 10),
 

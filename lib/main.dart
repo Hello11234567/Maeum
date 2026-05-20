@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'utils/app_theme.dart';
 import 'utils/constants.dart';
 import 'screens/splash_screen.dart';
@@ -17,13 +18,15 @@ import 'services/api_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await dotenv.load(fileName: '.env');
   KakaoSdk.init(nativeAppKey: AppConstants.kakaoNativeAppKey);
+  print('카카오 앱 키: ${AppConstants.kakaoNativeAppKey}');
+
   ApiService.init();
 
   //FCM 초기화
   final fcmService = FcmService();
   await fcmService.initialize();
-
   runApp(const MyApp());
 }
 

@@ -223,6 +223,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       builder: (context) => ProfileEditScreen(),
                     ),
                   );
+                  _loadUserData();
                 }),
                 _divider(),
 

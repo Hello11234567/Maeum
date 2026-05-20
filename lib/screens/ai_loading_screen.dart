@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import '../utils/colors.dart';
 import '../utils/text_style.dart';
 import 'ai_result_screen.dart';
@@ -126,21 +127,10 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
                   child: child,
                 );
               },
-              child: Container(
+              child: Lottie.asset(
+                'assets/lottie/lottie_loading.json',
                 width: 120,
                 height: 120,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.2),
-                      AppColors.secondary.withValues(alpha: 0.2),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text('🤔', style: const TextStyle(fontSize: 56)),
-                ),
               ),
             ),
             const SizedBox(height: 32),
