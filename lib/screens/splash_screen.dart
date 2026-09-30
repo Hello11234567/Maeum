@@ -60,14 +60,27 @@ class _SplashScreenState extends State<SplashScreen>
         final storage = const FlutterSecureStorage();
         final refreshToken = await storage.read(key: 'refresh_token');
 
-        await ApiService.dio.post(
+        final response = await ApiService.dio.post(
           '/auth/refresh',
           options: Options(headers: {'Refresh-Token': refreshToken}),
         );
 
+        //새 Access Token 저장 추가
+        if (response.statusCode == 200) {
+          await storage.write(
+            key: 'access_token',
+            value: response.data['accessToken'],
+          );
+          await storage.write(
+              key: 'refresh_token',
+              value: response.data['refreshToken'],
+          );
+        }
+
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/main');
       } catch (e) {
+        print('스플래시 에러: $e');
         //재발급 실패 -> 로그인 화면
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/login');
