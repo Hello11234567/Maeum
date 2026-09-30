@@ -2,6 +2,7 @@
 // 닉네임 수정, 프로필 이미지 수정
 // 백엔드 연결 시 실제 저장 구현
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/colors.dart';
@@ -49,10 +50,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
-        );
+      if (e is DioException) {
+        //네트워크 연결 실패, 타임아웃 등 진짜 에러만 스낵바
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionError) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
+            );
+          }
+        }
+        //404 등 데이터가 없는 경우는 빈 화면으로 표시
       }
     }
   }
