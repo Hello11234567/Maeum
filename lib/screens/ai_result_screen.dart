@@ -43,6 +43,7 @@ class _AiResultScreenState extends State<AiResultScreen> {
   String _careList = '';
   String _speechText = '';
   String _lastModified = '';
+  String _representativeEmoji = '';
   bool _isLoading = true;
 
   @override
@@ -62,11 +63,14 @@ class _AiResultScreenState extends State<AiResultScreen> {
       );
 
       if (response.statusCode == 200) {
+        print('AI 분석 응답: ${response.data}');
         setState(() {
           _summary = response.data['summary'] ?? '';
           _careList = response.data['careList'] ?? '';
+          _careList = response.data['careList'] ?? '';
           _speechText = response.data['speechText'] ?? '';
           _lastModified = response.data['lastModified'] ?? '';
+          _representativeEmoji = response.data['representativeEmoji'] ?? '';
           _isLoading = false;
         });
       }
@@ -77,12 +81,14 @@ class _AiResultScreenState extends State<AiResultScreen> {
 
   //감정에 맞는 캐릭터 표정 반환
   String _getLottieAsset() {
-    if (widget.joy >= 7) return 'assets/lottie/lottie_joy.json';
-    if (widget.anger >= 7) return 'assets/lottie/lottie_anger.json';
-    if (widget.anxiety >= 7) return 'assets/lottie/lottie_anxiety.json';
-    if (widget.peace >= 7) return 'assets/lottie/lottie_peace.json';
-    if (widget.sadness >= 7) return 'assets/lottie/lottie_sadness.json';
-    return 'assets/lottie/lottie_default.json';
+    switch (_representativeEmoji) {
+      case '😊': return 'assets/lottie/lottie_joy.json';
+      case '😤': return 'assets/lottie/lottie_anger.json';
+      case '😰': return 'assets/lottie/lottie_anxiety.json';
+      case '😌': return 'assets/lottie/lottie_peace.json';
+      case '😔': return 'assets/lottie/lottie_sadness.json';
+      default: return 'assets/lottie/lottie_default.json';
+    }
   }
 
   @override
@@ -121,6 +127,7 @@ class _AiResultScreenState extends State<AiResultScreen> {
                         _getLottieAsset(),
                         width: 70,
                         height: 70,
+                        repeat: true,
                       ),
                       const SizedBox(width: 10),
 
