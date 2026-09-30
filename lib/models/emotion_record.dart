@@ -1,5 +1,5 @@
 //감정 기록 데이터 모델
-//사용자가 슬라이더로 입력한 5가지 감정 수취와 한 줄 일기 저장
+//사용자가 슬라이더로 입력한 5가지 감정 수치와 한 줄 일기 저장
 //fromJson: 서버 응답(JSON)을 EmotionRecord 객체로 변환
 //toJson: EmotionRecord 객체를 JSON으로 변환 (서버 전송 시 사용)
 
@@ -45,7 +45,7 @@ class EmotionRecord {
 
   Map<String, dynamic> toJson() {
     return {
-      'recordDate': recordDate,
+      'date': recordDate,
       'joy': joy,
       'anger': anger,
       'anxiety': anxiety,

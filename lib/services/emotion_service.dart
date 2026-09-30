@@ -15,18 +15,27 @@ class EmotionService {
 
   Future<Map<String, String>> _getHeaders() async {
     final token = await _authService.getToken();
-    return {'Authorization': 'Bearer $token'};
+    return {'Authorization': 'Bearer $token', 'Content-Type': 'application/json',};
   }
 
   Future<EmotionRecord?> saveEmotion(EmotionRecord record) async {
+    print("서비스 진입");
     try {
       final response = await _dio.post(
-        '${AppConstants.baseUrl}/emotions',
+        '${AppConstants.baseUrl}/emotions/my-emoji',
         data: record.toJson(),
         options: Options(headers: await _getHeaders()),
       );
       return EmotionRecord.fromJson(response.data);
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
       return null;
     }
   }
@@ -40,6 +49,14 @@ class EmotionService {
       );
       return EmotionRecord.fromJson(response.data);
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
       return null;
     }
   }
@@ -53,6 +70,14 @@ class EmotionService {
       );
       return EmotionRecord.fromJson(response.data);
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
       return null;
     }
   }
@@ -65,6 +90,14 @@ class EmotionService {
       );
       return true;
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
       return false;
     }
   }
