@@ -5,6 +5,7 @@
 // 당일 이미 분석했으면 결과 화면으로 이동
 // 백엔드 연결 시 실제 데이터 연동
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/colors.dart';
@@ -34,6 +35,11 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
   bool _isFirstAnalysis = true; //첫 분석 여부
   bool _hasDiaryToday = false; //오늘 일기 작성 여부
   bool _hasAnalyzedToday = false; //오늘 이미 분석했는지
+  bool _profileUpdated = false; //프로필 수정했는지
+
+  String _nickname = '';
+  String _intro = '';
+  String? _ageRange;
 
   @override
   void initState() {
@@ -43,30 +49,43 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
 
   //서버에서 데이터 불러오기
   Future<void> _loadData() async {
+    print('_loadData 시작');
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    //오늘 일기 있는지 확인
     try {
-      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-      //오늘 일기 있는지 확인
       final diaryResponse = await ApiService.dio.get('/diaries?date=$today');
-      setState(() {
-        _hasDiaryToday = diaryResponse.statusCode == 200;
-      });
+      setState(() => _hasDiaryToday = diaryResponse.statusCode == 200);
+    } catch (e) {
+      /* 무시 */
+    }
 
-      //오늘 이미 분석했는지 확인
+    //오늘 이미 분석했는지 확인
+    try {
       final analysisResponse = await ApiService.dio.get(
         '/ai-analysis?date=$today',
       );
-      setState(() {
-        _hasAnalyzedToday = analysisResponse.statusCode == 200;
-      });
+      setState(() => _hasAnalyzedToday = analysisResponse.statusCode == 200);
+    } catch (e) {
+      /* 무시 */
+    }
 
-      //유저 정보 조회 (첫 분석 여부)
+    //유저 정보 조회 (첫 분석 여부)
+    try {
       final userResponse = await ApiService.dio.get('/users/me');
+      print('유저 응답 전체: ${userResponse.data}');
       setState(() {
-        _isFirstAnalysis = userResponse.data['nickname'] == null;
+        _isFirstAnalysis = !(userResponse.data['profileUpdated'] ?? false);
+        _nickname = userResponse.data['nickname'] ?? '';
+        _intro = userResponse.data['intro'] ?? '';
+        _ageRange = userResponse.data['ageRange'];
+        _profileUpdated = userResponse.data['profileUpdated'] ?? false;
       });
+    } catch (e) {
+      /* 무시 */
+    }
 
-      //오늘 감정 기록 있으면 기존 수치 불러오기
+    //오늘 감정 기록 있으면 기존 수치 불러오기
+    try {
       final emotionResponse = await ApiService.dio.get(
         '/emotions',
         queryParameters: {'startDate': today, 'endDate': today},
@@ -83,19 +102,17 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
-        );
-      }
+      /* 무시 */
     }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowPopup();
     });
   }
 
   void _checkAndShowPopup() {
+    print('hasAnalyzedToday: $_hasAnalyzedToday');
+    print('isFirstAnalysis: $_isFirstAnalysis');
+    print('profileUpdated: $_profileUpdated');
     if (_hasAnalyzedToday) {
       //오늘 이미 분석했으면 결과 화면으로 이동
       Navigator.pushReplacement(
@@ -120,125 +137,248 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
 
   //첫 분석 환영 팝업
   void _showWelcomePopup() {
-    final nicknameController = TextEditingController();
-    final introController = TextEditingController();
+    final nicknameController = TextEditingController(text: _nickname);
+    final introController = TextEditingController(text: _intro);
+    String? selectedAgeRange = _ageRange;
+    bool isEditing =
+        !(_profileUpdated &&
+            _nickname.isNotEmpty &&
+            _intro.isNotEmpty &&
+            _ageRange != null);
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🌱', style: TextStyle(fontSize: 40)),
-              const SizedBox(height: 12),
-              Text('처음 만나서 반가워요!', style: AppTextStyle.heading2),
-              const SizedBox(height: 8),
-              Text(
-                '당신에 대해 간단히 알려주세요 :)\n나중에 프로필에서 수정할 수 있어요!',
-                style: AppTextStyle.body2,
-                textAlign: TextAlign.center,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🌱', style: TextStyle(fontSize: 40)),
+                  const SizedBox(height: 12),
+                  Text('처음 만나서 반가워요!', style: AppTextStyle.heading2),
+                  const SizedBox(height: 16),
+
+                  if (!isEditing) ...[
+                    if (_nickname.isNotEmpty)
+                      Text(
+                        '$_nickname님이라고 블러드릴까요?',
+                        style: AppTextStyle.body1,
+                        textAlign: TextAlign.center,
+                      ),
+                    if (_intro.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '$_intro이(가) 맞으실까요?',
+                        style: AppTextStyle.body1,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    if (_ageRange != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '$_ageRange이시군요!',
+                        style: AppTextStyle.body1,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Text(
+                      '이대로 진행할까요?\n수정을 원하시면 말씀해주세요 :)',
+                      style: AppTextStyle.body2,
+                      textAlign: TextAlign.center,
+                    ),
+                  ] else ...[
+                    TextField(
+                      controller: nicknameController,
+                      style: AppTextStyle.body1,
+                      decoration: InputDecoration(
+                        labelText: '제가 어떻게 불러드릴까요?',
+                        labelStyle: AppTextStyle.body2,
+                        hintText: '닉네임 입력',
+                        hintStyle: AppTextStyle.body2,
+                        filled: true,
+                        fillColor: AppColors.background,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    //한 줄 소개
+                    TextField(
+                      controller: introController,
+                      style: AppTextStyle.body1,
+                      decoration: InputDecoration(
+                        labelText: '나를 한 마디로 표현하면?',
+                        labelStyle: AppTextStyle.body2,
+                        hintText: '예) 취업 준비 중인 대학생',
+                        hintStyle: AppTextStyle.body2,
+                        filled: true,
+                        fillColor: AppColors.background,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    //나이대 선택
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('나이대가 어떻게 되세요?', style: AppTextStyle.body2),
+                    ),
+                    const SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ['10대', '20대', '30대', '40대', '50대 이상'].map((
+                          age,
+                        ) {
+                          final isSelected = selectedAgeRange == age;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () =>
+                                  setDialogState(() => selectedAgeRange = age),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 7,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary.withValues(
+                                          alpha: 0.15,
+                                        )
+                                      : AppColors.background,
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.border,
+                                  ),
+                                ),
+                                child: Text(
+                                  age,
+                                  style: AppTextStyle.body2.copyWith(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textPrimary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(height: 20),
-              //닉네임
-              TextField(
-                controller: nicknameController,
-                style: AppTextStyle.body1,
-                decoration: InputDecoration(
-                  labelText: '제가 어떻게 불러드릴까요?',
-                  labelStyle: AppTextStyle.body2,
-                  hintText: '닉네임 입력',
-                  hintStyle: AppTextStyle.body2,
-                  filled: true,
-                  fillColor: AppColors.background,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.primary),
+            ),
+            actions: [
+              if (!isEditing)
+                TextButton(
+                  onPressed: () => setDialogState(() => isEditing = true),
+                  child: Text(
+                    '수정하기',
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-
-              //나이대 선택
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('나이대가 어떻게 되세요?', style: AppTextStyle.body2),
-              ),
-              const SizedBox(height: 8),
-              _AgeRangeSelector(),
-              const SizedBox(height: 12),
-
-              //나를 한 마디로
-              TextField(
-                controller: introController,
-                style: AppTextStyle.body1,
-                maxLength: 30,
-                decoration: InputDecoration(
-                  labelText: '나를 한 마디로 표현하면?',
-                  labelStyle: AppTextStyle.body2,
-                  hintText: '예) 취업 준비 중인 대학생',
-                  hintStyle: AppTextStyle.body2,
-                  filled: true,
-                  fillColor: AppColors.background,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.border),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (isEditing) {
+                      //입력값 검사
+                      if (nicknameController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('닉네임을 입력해주세요.')),
+                        );
+                        return;
+                      }
+                      if (introController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('한 줄 소개를 입력해주세요.')),
+                        );
+                        return;
+                      }
+                      if (selectedAgeRange == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('나이대를 선택해주세요.')),
+                        );
+                        return;
+                      }
+                      setDialogState(() => isEditing = false);
+                      setState(() {
+                        _nickname = nicknameController.text;
+                        _intro = introController.text;
+                        _ageRange = selectedAgeRange;
+                      });
+                    } else {
+                      try {
+                        await ApiService.dio.put(
+                          '/users/me',
+                          data: {
+                            'nickname': nicknameController.text,
+                            'intro': introController.text,
+                            'ageRange': selectedAgeRange,
+                          },
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('저장에 실패했습니다. 다시 시도해주세요'),
+                          ),
+                        );
+                      }
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      if (!_hasDiaryToday) _showDiaryPopup();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.primary),
-                  ),
+                  child: Text('시작하기', style: AppTextStyle.button),
                 ),
               ),
             ],
-          ),
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              //서버에 닉네임, 나이대, 소개 저장
-              onPressed: () async {
-                try {
-                  await ApiService.dio.put(
-                    '/users/me',
-                    data: {
-                      'nickname': nicknameController.text,
-                      'intro': introController.text,
-                    },
-                  );
-                } catch (e) {
-                  //저장 실패
-                }
-                if (!context.mounted) return;
-                Navigator.pop(context);
-                if (!_hasDiaryToday) _showDiaryPopup();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text('시작하기', style: AppTextStyle.button),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -417,6 +557,7 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
                     ),
                   );
                 } catch (e) {
+                  print('AI 분석 에러: $e');
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('오류가 발생했습니다. 다시 시도 해주세요.')),
@@ -428,48 +569,6 @@ class _AiAnalysisScreenState extends State<AiAnalysisScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-//나이대 선택 위젯 (팝업 안에서 상태관리용)
-class _AgeRangeSelector extends StatefulWidget {
-  @override
-  State<_AgeRangeSelector> createState() => _AgeRangeSelectorState();
-}
-
-class _AgeRangeSelectorState extends State<_AgeRangeSelector> {
-  String? _selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      children: ['10대', '20대', '30대', '40대', '50대 이상'].map((age) {
-        final isSelected = _selected == age;
-        return GestureDetector(
-          onTap: () => setState(() => _selected = age),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.15)
-                  : AppColors.background,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : AppColors.border,
-              ),
-            ),
-            child: Text(
-              age,
-              style: AppTextStyle.body2.copyWith(
-                color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }
