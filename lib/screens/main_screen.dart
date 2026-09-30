@@ -240,35 +240,45 @@ class _MainScreenState extends State<MainScreen> {
                         //이미지 선택 시 서버에 저장
                         if (result != null) {
                           setState(() {
-                            _myEmojis[date.toIso8601String().substring(0, 10)] = result;
+                            _myEmojis[date.toIso8601String().substring(0, 10)] =
+                                result;
                           });
                         }
                       },
-                      onLongPress: () {
-                        //백엔드 연결 시 실제 데이터 확인 후 분기
+                      onLongPress: () async {
+                        final dateStr = date.toIso8601String().substring(0, 10);
                         //기록 있으면 AI 분석 결과로, 없으면 다이얼로그
-                        bool hasRecord = _myEmojis.containsKey(
-                          date.toIso8601String().substring(0, 10),
-                        );
 
-                        if (hasRecord) {
-                          //기록 있으면 AI 분석 결과 화면으로 이동
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AiResultScreen(
-                                joy: 7.0,
-                                // 나중에 실제 데이터로 교체
-                                anger: 3.0,
-                                anxiety: 2.0,
-                                peace: 8.0,
-                                sadness: 1.0,
-                                mode: 'view',
-                                date: date,
-                              ),
-                            ),
+                        try {
+                          final response = await ApiService.dio.get(
+                            '/ai-analysis',
+                            queryParameters: {'date': dateStr},
                           );
-                        } else {
+
+                          if (response.statusCode == 200) {
+                            if (!context.mounted) return;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AiResultScreen(
+                                  joy: response.data['joy']?.toDouble() ?? 5.0,
+                                  anger:
+                                      response.data['anger']?.toDouble() ?? 5.0,
+                                  anxiety:
+                                      response.data['anxiety']?.toDouble() ??
+                                      5.0,
+                                  peace:
+                                      response.data['peace']?.toDouble() ?? 5.0,
+                                  sadness:
+                                      response.data['sadness']?.toDouble() ??
+                                      5.0,
+                                  mode: 'view',
+                                  date: date,
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
