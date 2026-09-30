@@ -4,6 +4,7 @@
 // 날짜 클릭 시 일기 상세/수정 바텀시트
 // 백엔드 연결 시 실제 데이터로 교체
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/colors.dart';
@@ -42,7 +43,19 @@ class _DiaryScreenState extends State<DiaryScreen> {
         });
       }
     } catch (e) {
-      //서버 연결 실패 시 빈 리스트 표시
+      if (e is DioException) {
+        //네트워크 연결 실패, 타임아웃 등 진짜 에러만 스낵바
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionError) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('데이터를 불러오지 못했습니다. 다시 시도해주세요.')),
+            );
+          }
+        }
+        //404 등 데이터가 없는 경우는 빈 화면으로 표시
+      }
     }
   }
 
@@ -164,16 +177,24 @@ class _DiaryScreenState extends State<DiaryScreen> {
                               Text(
                                 date.day.toString(),
                                 style: AppTextStyle.heading2.copyWith(
-                                  color: isToday ? AppColors.primary : AppColors.textPrimary, //오늘이면 primary
-                                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                  color: isToday
+                                      ? AppColors.primary
+                                      : AppColors.textPrimary, //오늘이면 primary
+                                  fontWeight: isToday
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                                 ),
                               ),
                               Text(
                                 _weekdays[date.weekday % 7],
                                 style: AppTextStyle.heading3.copyWith(
-                                  color: isToday ? AppColors.primary : AppColors.textSecondary,
+                                  color: isToday
+                                      ? AppColors.primary
+                                      : AppColors.textSecondary,
 
-                                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                  fontWeight: isToday
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                                 ),
                               ),
                             ],
@@ -325,17 +346,27 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                   await ApiService.dio.post(
                                     '/diaries',
                                     data: {
-                                      'date': DateFormat('yyyy-MM-dd').format(date),
+                                      'date': DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).format(date),
                                       'content': controller.text,
                                     },
                                   );
                                   setState(() {
-                                    diaries[DateFormat('yyyy-MM-dd').format(date)] = controller.text;
+                                    diaries[DateFormat(
+                                          'yyyy-MM-dd',
+                                        ).format(date)] =
+                                        controller.text;
                                   });
                                   if (!context.mounted) return;
                                   Navigator.pop(context);
                                 } catch (e) {
-                                  //저장 실패
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('저장에 실패했습니다. 다시 시도해주세요'),
+                                    ),
+                                  );
                                 }
                               },
                               style: ElevatedButton.styleFrom(
