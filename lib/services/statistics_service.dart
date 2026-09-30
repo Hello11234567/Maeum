@@ -14,11 +14,13 @@ class StatisticsService {
   final AuthService _authService = AuthService();
 
   Future<Map<String, String>> _getHeaders() async {
+    print("서비스 진입");
     final token = await _authService.getToken();
     return {'Authorization': 'Bearer $token'};
   }
 
   Future<Statistics?> getWeeklyStats() async {
+    print("서비스 진입");
     try {
       final response = await _dio.get(
         '${AppConstants.baseUrl}/statistics/weekly',
@@ -26,23 +28,43 @@ class StatisticsService {
       );
       return Statistics.fromJson(response.data);
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
+
       return null;
     }
   }
 
   Future<Statistics?> getMonthlyStats() async {
+    print("서비스 진입");
     try {
       final response = await _dio.get(
-        '${AppConstants.baseUrl}.statistics/monthly',
+        '${AppConstants.baseUrl}/statistics/monthly',
         options: Options(headers: await _getHeaders()),
       );
       return Statistics.fromJson(response.data);
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
+
       return null;
     }
   }
 
   Future<List<Statistics>?> getWeeklyComparison() async {
+    print("서비스 진입");
     try {
       final response = await _dio.get(
         '${AppConstants.baseUrl}/statistics/weekly/compare',
@@ -52,11 +74,21 @@ class StatisticsService {
           .map((e) => Statistics.fromJson(e))
           .toList();
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
+
       return null;
     }
   }
 
   Future<List<Statistics>?> getMonthlyComparison() async {
+    print("서비스 진입");
     try {
       final response = await _dio.get(
         '${AppConstants.baseUrl}/statistics/monthly/compare',
@@ -66,6 +98,15 @@ class StatisticsService {
           .map((e) => Statistics.fromJson(e))
           .toList();
     } catch (e) {
+      print("에러타입: ${e.runtimeType}");
+      print("에러내용: $e");
+
+      if (e is DioException) {
+        print("상태코드: ${e.response?.statusCode}");
+        print("응답데이터: ${e.response?.data}");
+        print("요청주소: ${e.requestOptions.uri}");
+      }
+
       return null;
     }
   }
