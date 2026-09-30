@@ -89,7 +89,12 @@ class _DiaryWriteScreenState extends State<DiaryWriteScreen> {
                   if (!context.mounted) return;
                   Navigator.pop(context, true);
                 } catch (e) {
-                  //저장 실패
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('저장에 실패했습니다. 다시 시도해주세요'),
+                    ),
+                  );
                 }
               },
             ),
