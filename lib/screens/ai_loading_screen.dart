@@ -70,38 +70,44 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
   }
 
   Future<void> _analyzeAndNavigate() async {
-    try {
-      final response = await ApiService.dio.get(
-        '/ai-analysis',
-        queryParameters: {
-          'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-        },
-      );
-
-      if (response.statusCode == 200) {
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AiResultScreen(
-              mode: 'new',
-              date: null,
-              joy: widget.joy,
-              anger: widget.anger,
-              anxiety: widget.anxiety,
-              peace: widget.peace,
-              sadness: widget.sadness,
-            ),
-          ),
+    await Future.delayed(const Duration(seconds: 2));
+    //AI 분석 완료될 때까지 재시도
+    int retryCount = 0;
+    while (retryCount < 10) {
+      try {
+        final response = await ApiService.dio.get(
+          '/ai-analysis',
+          queryParameters: {
+            'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          },
         );
+        if (response.statusCode == 200) {
+          if (!mounted) return;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AiResultScreen(
+                mode: 'new',
+                date: null,
+                joy: widget.joy,
+                anger: widget.anger,
+                anxiety: widget.anxiety,
+                peace: widget.peace,
+                sadness: widget.sadness,
+              ),
+            ),
+          );
+          return;
+        }
+      } catch (e) {
+        retryCount++;
       }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('분석에 실패했습니다. 다시 시도 해주세요.')),
-      );
-      Navigator.pop(context);
     }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('분석에 실패했습니다. 다시 시도 해주세요.')),
+    );
+    Navigator.pop(context);
   }
 
   @override
