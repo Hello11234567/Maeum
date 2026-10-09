@@ -20,15 +20,15 @@ MindLog 캡스톤 디자인 프로젝트에서 구현한 감정 기록 및 AI �
 >일부 기능은 서버 API와의 정합성 및 실기기 연동 검증이 더 필요합니다. 현재 개발 중인 기능을 포함합니다.
 
 ## 🛠 기술 스택
-| 구분       | 기술                                      |
-|----------|-----------------------------------------|
-| Moblie   | Flutter, Dart                           |
-| API 통신   | Dio                                     |
-| 인증       | Kakao Flutter SDK, JWT 연동               |
-| 토큰 저장    | Flutter Secure Storage                  |
-| 푸시 알림 기반 | Firebase Core, Firebase Cloud Messaging |
-| 환경 설정    | flutter_dotenv                          |
-| 애니메이션    | Lottie                                  |
+| 구분       | 기술                                           |
+|----------|----------------------------------------------|
+| Mobile   | Flutter, Dart                                |
+| API 통신   | Dio                                          |
+| 인증       | Kakao Flutter SDK                            |
+| 토큰 저장    | Flutter Secure Storage                       |
+| 푸시 알림 기반 | Firebase Core, Firebase Cloud Messaging(초기화) |
+| 환경 설정    | flutter_dotenv                               |
+| 애니메이션    | Lottie                                       |
 
 ## 🔧 주요 구현
 ### 1. 감정 기록 및 조회
